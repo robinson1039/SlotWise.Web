@@ -1,0 +1,18 @@
+﻿@model dynamic
+
+<h3>Debug Information</h3>
+
+<h4>1. GetListAsync()</h4>
+<p>Success: @ViewBag.ServiceSuccess</p>
+<p>Message: @ViewBag.ServiceMessage</p>
+<p>Data Count: @ViewBag.ServiceDataCount</p>
+
+<h4>2. GetPaginatedListAsync()</h4>
+<p>Success: @ViewBag.PaginationSuccess</p>
+<p>Message: @ViewBag.PaginationMessage</p>
+<p>Data Count: @ViewBag.PaginationDataCount</p>
+
+@if (ViewBag.Error != null)
+{
+    <h4 style="color: red;">ERROR: @ViewBag.Error</h4>
+}

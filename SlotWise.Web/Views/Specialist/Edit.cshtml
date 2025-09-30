@@ -1,0 +1,75 @@
+﻿@model SlotWise.Web.DTOs.SpecialistDTO
+@{
+    ViewData["Title"] = "Editar especialista";
+}
+
+<div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Especialistas</a></li>
+            <li class="breadcrumb-item active">Editar especialista</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section dashboard">
+    <div class="card">
+
+        <div class="card-header">
+            <h3 class="m-0 font-weight-bold text-primary">Editar especialista</h3>
+        </div>
+
+        <div class="card-body mt-3">
+
+            <form asp-action="Edit" method="POST" class="row g-3">
+
+                <input type="hidden" asp-for="Id" />
+
+                <div class="col-md-12">
+                    <div class="form-floating">
+                        <input asp-for="Name" class="form-control" placeholder="@Html.DisplayFor(dto => dto.Name)">
+                        <label asp-for="Name"></label>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="Age" class="form-control" placeholder="@Html.DisplayFor(dto => dto.Age)">
+                        <label asp-for="Age"></label>
+                        <span asp-validation-for="Age" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="CreateAt" class="form-control" placeholder="@Html.DisplayFor(dto => dto.CreateAt)">
+                        <label asp-for="CreateAt"></label>
+                        <span asp-validation-for="CreateAt" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input asp-for="Status" class="form-check-input" type="checkbox" />
+                        <label asp-for="Status" class="form-check-label"></label>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary" type="submit">Guardar</button>
+                    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

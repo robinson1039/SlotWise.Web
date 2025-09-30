@@ -1,0 +1,64 @@
+# Archivos de usuario de Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Carpetas de compilación
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# Configuración de VS
+.vs/
+
+# Archivos de cache y logs
+*.log
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.tmp
+*.cache
+*.bak
+*.ncb
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+# Configuración de build generada
+*.nuget.g.props
+*.nuget.g.targets
+
+# Archivos de paquetes (usar NuGet restore en lugar de subirlos)
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Archivos de publish temporales
+publish/
+*.pubxml
+*.pubxml.user
+
+# Archivos de migraciones compilados
+Migrations/**/*.Designer.cs
+
+# Archivos generados por scaffolding de Razor
+*.g.cs
+*.g.i.cs
+*.AssemblyInfo.cs
+*.AssemblyAttributes.cs
+
+# Archivos de configuración sensibles
+appsettings.Development.json
+appsettings.*.json
+
+# Otros
+*.pdb
+*.dbmdl
+*.jfm
