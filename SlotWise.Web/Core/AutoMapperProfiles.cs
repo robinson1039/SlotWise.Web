@@ -9,8 +9,12 @@ namespace SlotWise.Web.Core
         public AutoMapperProfiles()
         {
             CreateMap<Specialist, SpecialistDTO>()
-                .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.Create_at)) // ← ESTA LÍNEA FALTA
+                .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.Create_at))
                 .ReverseMap();
+            CreateMap<User, UserDTO>()
+                .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.CreateAt))
+                .ReverseMap();
+
         }
     }
 }

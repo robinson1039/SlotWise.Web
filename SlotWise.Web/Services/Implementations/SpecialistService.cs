@@ -25,7 +25,12 @@ namespace SlotWise.Web.Services.Implementations
                 Specialist specialist = new Specialist
                 {
                     Id = Guid.NewGuid(),
-                    Name = dto.Name,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    CC = dto.CC,
+                    Email = dto.Email,
+                    Phone = dto.Phone,
+                    SpecialistDescription = dto.SpecialistDescription,
                     Age = dto.Age ?? 0,  // Convierte null a 0 o usa un valor por defecto
                     Status = dto.Status,
                     Create_at = DateTime.UtcNow
@@ -106,7 +111,7 @@ namespace SlotWise.Web.Services.Implementations
                 if (specialists.Any())
                 {
                     var first = specialists.First();
-                    Console.WriteLine($"First specialist - Name: {first.Name}, Create_at: {first.Create_at}, Age: {first.Age}");
+                    Console.WriteLine($"First specialist - Name: {first.FirstName}, Create_at: {first.Create_at}, Age: {first.Age}");
                 }
 
                 List<SpecialistDTO> list = _mapper.Map<List<SpecialistDTO>>(specialists);
@@ -115,7 +120,7 @@ namespace SlotWise.Web.Services.Implementations
                 if (list.Any())
                 {
                     var firstDto = list.First();
-                    Console.WriteLine($"First DTO - Name: {firstDto.Name}, CreateAt: {firstDto.CreateAt}, Age: {firstDto.Age}");
+                    Console.WriteLine($"First DTO - Name: {firstDto.FirstName}, CreateAt: {firstDto.CreateAt}, Age: {firstDto.Age}");
                 }
 
                 return Response<List<SpecialistDTO>>.Success(list);
@@ -157,7 +162,7 @@ namespace SlotWise.Web.Services.Implementations
             if (!string.IsNullOrWhiteSpace(request.Filter))
             {
                 // CORRECCIÓN: Elimina la duplicación en la condición
-                query = query.Where(s => s.Name.ToLower().Contains(request.Filter.ToLower()));
+                query = query.Where(s => s.FirstName.ToLower().Contains(request.Filter.ToLower()));
             }
 
             return await GetPaginationAsync<Specialist, SpecialistDTO>(request, query);

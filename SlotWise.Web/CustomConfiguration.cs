@@ -40,6 +40,7 @@ namespace SlotWise.Web
         private static void AddServices(WebApplicationBuilder builder)
         {
             builder.Services.AddScoped<ISpecialistService, SpecialistService>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<CustomQueryableOperationsService>();
         }
     }
