@@ -62,7 +62,7 @@ namespace SlotWise.Web.Services.Implementations
                 }
 
                 _context.Specialist.Remove(specialist);
-               await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
                 return Response<object>.Success("Sección eliminada con éxito");
             }
@@ -133,7 +133,7 @@ namespace SlotWise.Web.Services.Implementations
                 return Response<List<SpecialistDTO>>.Failure(ex);
             }
         }
-        
+
         public async Task<Response<SpecialistDTO>> GetOneAsync(Guid id)
         {
             try
@@ -181,7 +181,7 @@ namespace SlotWise.Web.Services.Implementations
 
                 // CAMBIO IMPORTANTE: Hacer toggle del estado
                 specialist.Status = !specialist.Status;  // ← Esto cambia true→false o false→true
-        
+
                 // Quita el AsNoTracking() porque necesitas que EF rastreé los cambios
                 await _context.SaveChangesAsync();
 

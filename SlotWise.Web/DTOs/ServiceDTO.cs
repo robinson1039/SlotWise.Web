@@ -21,6 +21,9 @@ namespace SlotWise.Web.DTOs
         [StringLength(500, ErrorMessage = "La descripción no puede exceder 500 caracteres.")]
         public string Description { get; set; } = string.Empty;
 
+        [Display(Name = "Estado")]
+        public bool Status { get; set; } = true;
+
         [Display(Name = "Especialista")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
         public Guid SpecialistId { get; set; }

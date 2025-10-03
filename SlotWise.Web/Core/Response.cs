@@ -2,6 +2,16 @@
 {
     public class Response<T>  
     {
+        private string v=string.Empty;
+
+        public Response()
+        {
+        }
+        public Response(string v)
+        {
+            this.v = v;
+        }
+
         public bool IsSuccess { get; set; }
         public string? Message { get; set; }
         public List<string> Errors { get; set; } = new();

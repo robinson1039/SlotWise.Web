@@ -21,7 +21,7 @@ namespace SlotWise.Web.Controllers
         {
             try
             {
-                var response = await _userService.GetPaginatedListAsync(request);
+                Response<PaginationResponse<UserDTO>> response = await _userService.GetPaginatedListAsync(request);
                 if (!response.IsSuccess)
                 {
                     // Mostrar el mensaje de error en la vista
