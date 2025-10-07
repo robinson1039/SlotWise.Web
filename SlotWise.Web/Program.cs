@@ -1,3 +1,4 @@
+using AspNetCoreHero.ToastNotification.Extensions;
 using SlotWise.Web;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseNotyf();
+
 
 app.MapControllerRoute(
     name: "default",

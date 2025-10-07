@@ -41,7 +41,10 @@ namespace SlotWise.Web
         {
             builder.Services.AddScoped<ISpecialistService, SpecialistService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IServiceService, ServiceService>();
             builder.Services.AddScoped<CustomQueryableOperationsService>();
+            
+
         }
     }
 }

@@ -42,7 +42,7 @@ namespace SlotWise.Web.Data
                 .HasForeignKey(s => s.SpecialistId)
                 .OnDelete(DeleteBehavior.Cascade); // ← Este puede seguir siendo Cascade
 
-            // ✅ AGREGAR configuración para el decimal Price
+            // AGREGAR configuración para el decimal Price
             modelBuilder.Entity<Service>()
                 .Property(s => s.Price)
                 .HasPrecision(18, 2); // Precisión para decimal

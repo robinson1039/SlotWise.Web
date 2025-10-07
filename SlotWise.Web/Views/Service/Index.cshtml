@@ -1,5 +1,201 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@using SlotWise.Web.Core.Pagination
+@using SlotWise.Web.DTOs
+@model PaginationResponse<ServiceDTO>
+
+@if (ViewBag.ErrorMessage != null)
+{
+	<div class="alert alert-danger">@ViewBag.ErrorMessage</div>
 }
+
+@{
+	ViewData["Title"] = "Servicios";
+}
+
+<div class="pagetitle">
+	<h1>Dashboard</h1>
+	<nav>
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Inicio</a></li>
+			<li class="breadcrumb-item active">Servicios</li>
+		</ol>
+	</nav>
+</div>
+
+<section class="section dashboard">
+	<div class="card">
+
+		<div class="card-header">
+			<div class="row">
+				<h3 class="m-0 font-weight-bold text-primary col-md-11">Servicios</h3>
+				<div class="col-md-1">
+					<a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i></a>
+				</div>
+			</div>
+		</div>
+
+		<div class="card-body mt-3">
+			<form asp-action="Index" class="navbar-search" method="GET">
+				<input type="hidden" name="Page" value="1" />
+
+				<div class="row mt-3">
+					<div class="col-md-auto">
+						<select name="RecordsPerPage" class="form-select bg-light border-0 small"
+								asp-for="RecordsPerPage" onchange="this.form.submit()">
+							<option value="2" selected="@(Model.RecordsPerPage == 2)">2</option>
+							<option value="10" selected="@(Model.RecordsPerPage == 10)">10</option>
+							<option value="15" selected="@(Model.RecordsPerPage == 15)">15</option>
+							<option value="30" selected="@(Model.RecordsPerPage == 30)">30</option>
+							<option value="50" selected="@(Model.RecordsPerPage == 50)">50</option>
+						</select>
+					</div>
+
+					<div class="col-md-10">
+						<div class="input-group mb-3">
+							<input type="text"
+								class="form-control bg-light border-0 small"
+								placeholder="Buscar servicio"
+								aria-label="search"
+								asp-for="Filter" />
+							<button class="btn btn-primary"><i class="bi bi-search"></i></button>
+						</div>
+					</div>
+				</div>
+			</form>
+
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						 <th>Id</th>
+                        <th>Nombre del servicio</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Especialista</th>
+                        <th>Estado</th>
+                        <th></th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (ServiceDTO item in Model.List)
+					{
+						<tr>
+							<td>@item.Id</td>
+							<td>@item.NameService</td>
+							<td>@item.Description</td>
+							<td>@item.Price.ToString("C")</td>
+							<td>@item.SpecialistName</td>
+							<td>
+								@if (item.Status)
+								{
+									<span class="badge bg-success">Activo</span>
+								}
+								else
+								{
+									<span class="badge bg-danger">Inactivo</span>
+								}
+							</td>
+							<td>
+								<a asp-action="Edit" asp-route-Id="@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i></a>
+
+								<form asp-action="Toggle" style="display: contents;" method="POST">
+									<input type="hidden" value="@item.Id" name="Id" />
+									<input type="hidden" value="@(!item.Status)" name="Status" />
+									<button class="btn btn-sm @(item.Status ? "btn-secondary" : "btn-info")"
+											data-bs-toggle="tooltip" data-bs-placement="top"
+											title="@(item.Status ? "Desactivar" : "Activar")">
+										<i class="@(item.Status ? "bi bi-eye-slash-fill" : "bi bi-eye")"></i>
+									</button>
+								</form>
+
+								<form asp-action="Delete" asp-route-Id="@item.Id" style="display: contents;">
+									<button class="btn btn-sm btn-danger btnDelete"><i class="bi bi-trash-fill"></i></button>
+								</form>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+
+			<!-- Paginación -->
+            <nav aria-label="">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item">
+                        <a class="page-link @(Model.CurrentPage == 1 ? "disabled" : "")"
+                           asp-route-Page="1"
+                           asp-route-RecordsPerPage="@Model.RecordsPerPage"
+                           asp-route-Filter="@Model.Filter"
+                           asp-action="Index">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+
+                    <li class="page-item">
+                        <a class="page-link @(!Model.HasPrevious ? "disabled" : "")"
+                           asp-route-Page="@(Model.CurrentPage - 1)"
+                           asp-route-RecordsPerPage="@Model.RecordsPerPage"
+                           asp-route-Filter="@Model.Filter"
+                           asp-action="Index">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+				
+                    @foreach (int pg in Model.Pages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link @(Model.CurrentPage == pg ? "disabled" : "")"
+                               asp-route-Page="@pg"
+                               asp-route-RecordsPerPage="@Model.RecordsPerPage"
+                               asp-route-Filter="@Model.Filter"
+                               asp-action="Index">
+                               @pg
+                            </a>
+                        </li>
+                    }
+
+                    <li class="page-item">
+                        <a class="page-link @(!Model.HasNext ? "disabled" : "")"
+                           asp-route-Page="@(Model.CurrentPage + 1)"
+                           asp-route-RecordsPerPage="@Model.RecordsPerPage"
+                           asp-route-Filter="@Model.Filter"
+                           asp-action="Index">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+
+                    <li class="page-item">
+                        <a class="page-link @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")"
+                           asp-route-Page="@Model.TotalPages"
+                           asp-route-RecordsPerPage="@Model.RecordsPerPage"
+                           asp-route-Filter="@Model.Filter"
+                           asp-action="Index">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+	<script>
+		$(document).ready(function () {
+			$('.btnDelete').click(function (event){
+				event.preventDefault();
+				Swal.fire({
+					icon:"question",
+					title:"¿Desea eliminar el servicio?",
+					text:"No podrá revertirlo",
+					showCancelButton:true}).then((result) =>{
+						if(result.isConfirmed){
+							const form= $(this).closest('form');
+							form.submit();
+
+						}
+					});
+			});
+		});
+	</script>
+
+}
+		
+

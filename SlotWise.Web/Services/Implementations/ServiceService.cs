@@ -32,10 +32,12 @@ namespace SlotWise.Web.Services.Implementations
                     NameService = dto.NameService,
                     Price = dto.Price,
                     Description = dto.Description,
-                    Status = dto.Status
+                    Status = dto.Status,
+                    SpecialistId = dto.SpecialistId
                 };
-                await _context.SaveChangesAsync();
                 await _context.Services.AddAsync(service);
+                await _context.SaveChangesAsync();
+
 
                 dto.Id = service.Id;
                 return Response<ServiceDTO>.Success(dto, "Servicio creado con éxito.");
@@ -71,14 +73,17 @@ namespace SlotWise.Web.Services.Implementations
         {
             try
             {
-                Service? service = await _context.Services.AsNoTracking().FirstOrDefaultAsync(s => s.Id == dto.Id);
-
+                Service? service = await _context.Services.FirstOrDefaultAsync(s => s.Id == dto.Id);
                 if (service is null)
                 {
-                    return Response<ServiceDTO>.Failure($"No existe servicio con id: {dto.Id}");
+                    return Response<ServiceDTO>.Failure($"No existe servicio con id:{dto.Id}");
                 }
 
-                service = _mapper.Map<Service>(dto);
+                _mapper.Map(dto, service); // actualiza propiedades sin crear un nuevo objeto
+               // await _context.SaveChangesAsync();
+
+
+               // service = _mapper.Map<Service>(dto);
                 _context.Services.Update(service);
                 await _context.SaveChangesAsync();
 
@@ -135,6 +140,8 @@ namespace SlotWise.Web.Services.Implementations
             {
                 query = query.Where(s => s.NameService.ToLower().Contains(request.Filter.ToLower()));
             }
+            query = query.OrderBy(s => s.NameService);//mostrar por oden de nombre de servicio
+            //se puede cambiar para ordenar por id u otro atributo. 
 
             return await GetPaginationAsync<Service, ServiceDTO>(request, query);
         }
@@ -151,6 +158,7 @@ namespace SlotWise.Web.Services.Implementations
                 }
 
                 service.Status = !service.Status;
+                _context.Services.Update(service);
                 await _context.SaveChangesAsync();
 
                 return Response<object>.Success(null,"Estado de servicio actualizado con éxito");

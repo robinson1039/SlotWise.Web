@@ -39,6 +39,8 @@
     @await Html.PartialAsync("_Scripts")
 
     @await RenderSectionAsync("Scripts", required: false)
+    @await Component.InvokeAsync("Notyf")
+
 
 </body>
 
