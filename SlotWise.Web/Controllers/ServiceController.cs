@@ -46,11 +46,6 @@ namespace SlotWise.Web.Controllers
                 return View(new PaginationResponse<ServiceDTO>());
             }
         }
-        //[HttpGet]
-        //public IActionResult Create()
-        //{
-        //    return View();
-        //}
 
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -76,10 +71,8 @@ namespace SlotWise.Web.Controllers
             return View();
         }
 
-
-
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm] ServiceDTO dto)
+        public async Task<IActionResult> Create([FromForm] ServiceDTO dto, IFormFile? ImageFile)
         {
 
 
@@ -88,6 +81,40 @@ namespace SlotWise.Web.Controllers
                 _notyfService.Error("Debe ajustar los errores de validación");
                 return View(dto);
             }
+
+            // verificar si se subio una imagen 
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                try
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images\\services");
+                    // Si no existe la carpeta, la crea automáticamente
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    // Nombre único para evitar duplicados
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    // Guardamos físicamente la imagen en la carpeta
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ImageFile.CopyToAsync(stream);
+                    }
+
+                    // Guardamos la ruta relativa para usarla en vistas o en la BD
+                    dto.ImgService = $"/images/services/{uniqueFileName}";
+                }
+                catch (Exception ex)
+                {
+                    _notyfService.Error($"Error al subir la imagen: {ex.Message}");
+                    return View(dto);
+
+                }
+            }
+
 
             Response<ServiceDTO> response = await _serviceService.CreateAsync(dto);
 
@@ -121,8 +148,7 @@ namespace SlotWise.Web.Controllers
             return View(response.Result);
         }
 
-        
-
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Edit([FromForm] ServiceDTO dto)
         {
@@ -132,21 +158,45 @@ namespace SlotWise.Web.Controllers
                 return View(dto);
             }
 
+            // Manejar la imagen antes de guardar
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+            {
+                string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                if (!Directory.Exists(uploadPath))
+                    Directory.CreateDirectory(uploadPath);
+
+                string fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.ImageFile.FileName)}";
+                string filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.ImageFile.CopyToAsync(stream);
+                }
+
+                dto.ImgService = fileName; // Nueva imagen
+            }
+            else
+            {
+                // Mantener imagen anterior si no se sube una nueva
+                var existing = await _serviceService.GetOneAsync(dto.Id);
+                dto.ImgService = existing.Result?.ImgService;
+            }
+
             Response<ServiceDTO> response = await _serviceService.EditAsync(dto);
 
             if (!response.IsSuccess)
             {
                 _notyfService.Error(response.Message);
-                
 
-                Response<List<SpecialistDTO>> specialists = await _specialistService.GetListAsync();
+                var specialists = await _specialistService.GetListAsync();
                 ViewBag.Specialists = specialists.Result;
                 return View(dto);
             }
-            
+
             _notyfService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete([FromRoute] Guid id)

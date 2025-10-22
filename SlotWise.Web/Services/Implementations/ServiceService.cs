@@ -33,7 +33,9 @@ namespace SlotWise.Web.Services.Implementations
                     Price = dto.Price,
                     Description = dto.Description,
                     Status = dto.Status,
-                    SpecialistId = dto.SpecialistId
+                    SpecialistId = dto.SpecialistId,
+                    // ImgService se asigna en el controlador después de subir la imagen
+                    ImgService = dto.ImgService ?? string.Empty // Asignar una cadena vacía si es null
                 };
                 await _context.Services.AddAsync(service);
                 await _context.SaveChangesAsync();

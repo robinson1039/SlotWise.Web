@@ -83,7 +83,7 @@ namespace SlotWise.Web.Services.Implementations
                 {
                     return Response<SpecialistDTO>.Failure($"No existe sección con id: {dto.Id}");
                 }
-
+                dto.CreateAt = specialist.Create_at;
                 specialist = _mapper.Map<Specialist>(dto);
                 _context.Specialist.Update(specialist);
                 await _context.SaveChangesAsync();

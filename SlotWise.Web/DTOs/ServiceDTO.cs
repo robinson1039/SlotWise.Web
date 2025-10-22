@@ -24,6 +24,11 @@ namespace SlotWise.Web.DTOs
         [Display(Name = "Estado")]
         public bool Status { get; set; } = true;
 
+        [Display(Name = "Imagen del Servicio")]
+        public string? ImgService { get; set; }
+        [Display(Name = "Subir nueva imagen")]
+        public IFormFile? ImageFile { get; set; } 
+
         [Display(Name = "Especialista")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
         public Guid SpecialistId { get; set; }

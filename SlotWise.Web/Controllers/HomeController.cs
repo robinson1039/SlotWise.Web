@@ -1,21 +1,50 @@
-using System.Diagnostics;
+using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using SlotWise.Web.Core;
+using SlotWise.Web.Core.Pagination;
+using SlotWise.Web.DTOs;
 using SlotWise.Web.Models;
+using SlotWise.Web.Services.Abstractions;
+using System.Diagnostics;
 
 namespace SlotWise.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IServiceService _serviceService;
+        private readonly INotyfService _notyfService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IServiceService serviceService, INotyfService notyfService)
         {
-            _logger = logger;
+            _serviceService = serviceService;
+            _notyfService = notyfService;
+
         }
 
-        public IActionResult Index()
+
+        [HttpGet]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            return View();
+            try
+            {
+                Response<PaginationResponse<ServiceDTO>> response = await _serviceService.GetPaginatedListAsync(request);
+
+                if (!response.IsSuccess)
+                {
+
+                    ViewBag.ErrorMessage = response.Message;
+                    return View(new PaginationResponse<ServiceDTO>());
+                }
+
+
+                return View(response.Result);
+            }
+            catch (Exception ex)
+            {
+                // Captura cualquier excepción no manejada
+                ViewBag.ErrorMessage = ex.Message;
+                return View(new PaginationResponse<ServiceDTO>());
+            }
         }
 
         public IActionResult Privacy()

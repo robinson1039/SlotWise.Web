@@ -47,14 +47,50 @@ namespace SlotWise.Web.Services.Implementations
                 return Response<UserDTO>.Failure(ex);
             }
         }
-        public Task<Response<object>> DeleteAsync(Guid id)
+        public async Task<Response<object>> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (user is null)
+                {
+                    return Response<object>.Failure($"No existe sección con id: {id}");
+                }
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+
+                return Response<object>.Success("Sección eliminada con éxito");
+            }
+            catch (Exception ex)
+            {
+                return Response<object>.Failure(ex);
+            }
         }
 
-        public Task<Response<UserDTO>> EditAsync(UserDTO dto)
+        public async Task<Response<UserDTO>> EditAsync(UserDTO dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                User? user = await _context.Users.AsNoTracking()
+                                                          .FirstOrDefaultAsync(s => s.Id == dto.Id);
+
+                if (user is null)
+                {
+                    return Response<UserDTO>.Failure($"No existe sección con id: {dto.Id}");
+                }
+                dto.CreateAt = user.CreateAt;
+                user = _mapper.Map<User>(dto);
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return Response<UserDTO>.Success(dto, "Sección actualizada con éxito");
+            }
+            catch (Exception ex)
+            {
+                return Response<UserDTO>.Failure(ex);
+            }
         }
 
         public async Task<Response<List<UserDTO>>> GetListAsync()
@@ -95,9 +131,25 @@ namespace SlotWise.Web.Services.Implementations
             }
         }
 
-        public Task<Response<UserDTO>> GetOneAsync(Guid id)
+        public async Task<Response<UserDTO>> GetOneAsync(Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                User? section = await _context.Users.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (section is null)
+                {
+                    return Response<UserDTO>.Failure($"No existe sección con id: {id}");
+                }
+
+                UserDTO dto = _mapper.Map<UserDTO>(section);
+
+                return Response<UserDTO>.Success(dto, "Sección obtenida con éxito");
+            }
+            catch (Exception ex)
+            {
+                return Response<UserDTO>.Failure(ex);
+            }
         }
 
         public async Task<Response<PaginationResponse<UserDTO>>> GetPaginatedListAsync(PaginationRequest request)

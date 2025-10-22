@@ -14,9 +14,14 @@ namespace SlotWise.Web.DTOs
         [Required(ErrorMessage = "El campo {0} es requerido.")]
         public Guid SpecialistId { get; set; }
 
+        [Display(Name = "Servicio")]
+        [Required(ErrorMessage = "El campo {0} es requerido.")]
+        public Guid ServiceId { get; set; }
+
         // Opcional: Incluir datos de las relaciones
         public string? UserName { get; set; }
         public string? SpecialistName { get; set; }
+        public string? ServiceName { get; set; }
 
         [Display(Name = "Estado")]
         public bool Status { get; set; }

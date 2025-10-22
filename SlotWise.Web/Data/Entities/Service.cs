@@ -9,5 +9,6 @@
         public bool Status { get; set; } = false;
         public Guid SpecialistId { get; set; }
         public Specialist Specialist { get; set; } = null!;
+        public required string ImgService { get; set; } = string.Empty;
     }
 }

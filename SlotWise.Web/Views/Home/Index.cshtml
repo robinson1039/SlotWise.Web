@@ -1,8 +1,27 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@using SlotWise.Web.Core.Pagination
+@using SlotWise.Web.DTOs
+@model PaginationResponse<ServiceDTO>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (ServiceDTO service in Model.List)
+    {
+        <div class="col">
+            <div class="card shadow-sm h-100">
+                <img src="~/images/@service.ImgService" class="card-img-top" alt="@service.NameService" style="height: 200px; width: 100%; object-fit: cover; border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+                <div class="card-body">
+                    <h5 class="card-title">@service.NameService</h5>
+                    <p class="card-text">@service.Description</p>
+                    @if(service.Status == true)
+                    {
+                        <a asp-action="Details" asp-route-id="@service.Id" class="btn btn-primary">Ver más</a>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" disabled>Servicio no disponible</button>
+                    }
+
+                </div>
+            </div>
+        </div>
+    }
 </div>

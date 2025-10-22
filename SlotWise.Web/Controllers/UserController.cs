@@ -4,6 +4,7 @@ using SlotWise.Web.Core;
 using SlotWise.Web.Core.Pagination;
 using SlotWise.Web.DTOs;
 using SlotWise.Web.Services.Abstractions;
+using SlotWise.Web.Services.Implementations;
 
 namespace SlotWise.Web.Controllers
 {
@@ -59,5 +60,53 @@ namespace SlotWise.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit([FromRoute] Guid id)
+        {
+            Response<UserDTO> response = await _userService.GetOneAsync(id);
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(response.Result);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit([FromForm] UserDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Obtener los nombres de los campos con error y su mensaje
+                var errores = ModelState
+                    .Where(ms => ms.Value.Errors.Any())
+                    .Select(ms => new
+                    {
+                        Campo = ms.Key,
+                        Mensajes = ms.Value.Errors.Select(e => e.ErrorMessage)
+                    })
+                    .ToList();
+
+                // Crear un mensaje descriptivo
+                string detalleErrores = string.Join("; ", errores.Select(e =>
+                    $"{e.Campo}: {string.Join(", ", e.Mensajes)}"));
+
+                _notyfService.Error($"Debe ajustar los errores de validación → {detalleErrores}");
+
+                return View(dto);
+            }
+
+            Response<UserDTO> response = await _userService.EditAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                _notyfService.Error(response.Message);
+                return View(dto);
+            }
+
+            _notyfService.Success(response.Message);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

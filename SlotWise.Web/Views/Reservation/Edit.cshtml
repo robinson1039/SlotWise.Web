@@ -1,0 +1,88 @@
+﻿@model SlotWise.Web.DTOs.ReservationDTO
+@{
+    ViewData["Title"] = "Editar reserva";
+}
+<div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Inicio</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Reservas</a></li>
+            <li class="breadcrumb-item active">Editar reserva</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section dashboard">
+    <div class="card">
+
+        <div class="card-header">
+            <h3 class="m-0 font-weight-bold text-primary">Editar reserva</h3>
+        </div>
+
+        <div class="card-body mt-3">
+            <form asp-action="Edit" method="POST" class="row g-3">
+
+                <!-- Campo oculto para el ID -->
+                <input type="hidden" asp-for="Id" />
+
+                <!-- Relación con usuario -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="UserId" asp-items="ViewBag.Users" class="form-select">
+                            <option value="">Seleccione un usuario</option>
+                        </select>
+                        <label asp-for="UserId"></label>
+                        <span asp-validation-for="UserId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Relación con especialista -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="SpecialistId" asp-items="ViewBag.Specialists" class="form-select">
+                            <option value="">Seleccione un especialista</option>
+                        </select>
+                        <label asp-for="SpecialistId"></label>
+                        <span asp-validation-for="SpecialistId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Relación con servicio -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="ServiceId" asp-items="ViewBag.Services" class="form-select">
+                            <option value="">Seleccione un servicio</option>
+                        </select>
+                        <label asp-for="ServiceId"></label>
+                        <span asp-validation-for="ServiceId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="col-12">
+                    <div class="form-check">
+                        <input asp-for="Status" class="form-check-input" type="checkbox" />
+                        <label asp-for="Status" class="form-check-label"></label>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-save"></i> Guardar cambios
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

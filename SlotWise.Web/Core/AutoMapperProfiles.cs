@@ -18,7 +18,14 @@ namespace SlotWise.Web.Core
                .ForMember(dest => dest.SpecialistName, opt => opt.MapFrom(src => src.Specialist != null ? src.Specialist.FirstName: string.Empty))
                .ReverseMap()
                .ForMember(dest => dest.Specialist, opt => opt.Ignore()); // Ignorar la navegación al mapear de vuelta
-
+            CreateMap<Reservation, ReservationDTO>()
+               .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.FirstName : string.Empty))
+               .ForMember(dest => dest.SpecialistName, opt => opt.MapFrom(src => src.Specialist != null ? src.Specialist.FirstName : string.Empty))
+               .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service != null ? src.Service.NameService : string.Empty))
+               .ReverseMap()
+               .ForMember(dest => dest.User, opt => opt.Ignore()) // Ignorar la navegación al mapear de vuelta
+               .ForMember(dest => dest.Specialist, opt => opt.Ignore()) // Ignorar la navegación al mapear de vuelta
+               .ForMember(dest => dest.Service, opt => opt.Ignore()); // Ignorar la navegación al mapear de vuelta
 
         }
     }

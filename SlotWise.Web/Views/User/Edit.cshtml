@@ -1,6 +1,6 @@
-﻿@model SlotWise.Web.DTOs.SpecialistDTO
+﻿@model SlotWise.Web.DTOs.UserDTO
 @{
-    ViewData["Title"] = "Editar especialista";
+    ViewData["Title"] = "Editar usuario";
 }
 
 <div class="pagetitle">
@@ -8,8 +8,8 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Inicio</a></li>
-            <li class="breadcrumb-item"><a asp-action="Index">Especialistas</a></li>
-            <li class="breadcrumb-item active">Editar especialista</li>
+            <li class="breadcrumb-item"><a asp-action="Index">Usuarios</a></li>
+            <li class="breadcrumb-item active">Editar usuario</li>
         </ol>
     </nav>
 </div>
@@ -17,14 +17,30 @@
 <section class="section dashboard">
     <div class="card">
         <div class="card-header">
-            <h3 class="m-0 font-weight-bold text-primary">Editar especialista</h3>
+            <h3 class="m-0 font-weight-bold text-primary">Editar usuario</h3>
         </div>
 
         <div class="card-body mt-3">
             <form asp-action="Edit" method="POST" class="row g-3">
-                <!-- Campo oculto para el ID -->
+                <!-- ID oculto -->
                 <input type="hidden" asp-for="Id" />
 
+                <!-- Username -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="UserName" class="form-control" placeholder="Nombre de usuario">
+                        <label asp-for="UserName"></label>
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                </div>
+                <!-- Contraseña -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="PasswordHash" type="password" class="form-control" placeholder="Contraseña (dejar en blanco para no cambiar)">
+                        <label asp-for="PasswordHash"></label>
+                        <span asp-validation-for="PasswordHash" class="text-danger"></span>
+                    </div>
+                </div>
                 <!-- Nombres -->
                 <div class="col-md-6">
                     <div class="form-floating">
@@ -52,47 +68,21 @@
                     </div>
                 </div>
 
-                <!-- Email -->
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="Email" class="form-control" placeholder="Correo electrónico">
-                        <label asp-for="Email"></label>
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <!-- Teléfono -->
-                <div class="col-md-6">
-                    <div class="form-floating">
-                        <input asp-for="Phone" class="form-control" placeholder="Teléfono">
-                        <label asp-for="Phone"></label>
-                        <span asp-validation-for="Phone" class="text-danger"></span>
-                    </div>
-                </div>
-
                 <!-- Edad -->
                 <div class="col-md-6">
                     <div class="form-floating">
-                        <input asp-for="Age" class="form-control" type="number" placeholder="Edad">
+                        <input asp-for="Age" class="form-control" placeholder="Edad">
                         <label asp-for="Age"></label>
                         <span asp-validation-for="Age" class="text-danger"></span>
                     </div>
                 </div>
 
-                <!-- Descripción -->
-                <div class="col-12">
+                <!-- Fecha de nacimiento -->
+                <div class="col-md-6">
                     <div class="form-floating">
-                        <textarea asp-for="SpecialistDescription" class="form-control" style="height: 100px" placeholder="Descripción del especialista"></textarea>
-                        <label asp-for="SpecialistDescription"></label>
-                        <span asp-validation-for="SpecialistDescription" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <!-- Estado -->
-                <div class="col-12">
-                    <div class="form-check mt-3">
-                        <input asp-for="Status" class="form-check-input" type="checkbox" />
-                        <label asp-for="Status" class="form-check-label"></label>
+                        <input asp-for="Birthdate" type="date" class="form-control" placeholder="Fecha de nacimiento">
+                        <label asp-for="Birthdate"></label>
+                        <span asp-validation-for="Birthdate" class="text-danger"></span>
                     </div>
                 </div>
 
