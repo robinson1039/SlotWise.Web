@@ -1,22 +1,253 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SlotWise.Web.Core;
 using SlotWise.Web.Core.Pagination;
+using SlotWise.Web.Data;
+using SlotWise.Web.Data.Entities;
 using SlotWise.Web.DTOs;
 using SlotWise.Web.Services.Abstractions;
-using SlotWise.Web.Services.Implementations;
 
 namespace SlotWise.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
+        private readonly DataContext _context;
         private readonly IUserService _userService;
         private readonly INotyfService _notyfService;
-        public UserController(IUserService userService, INotyfService notyfService)
+        private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
+        private readonly ILogger<UserController> _logger;
+        public UserController(IUserService userService, INotyfService notyfService, IMapper mapper, UserManager<User> userManager, ILogger<UserController> logger, DataContext context )
         {
             _userService = userService;
             _notyfService = notyfService;
+            _mapper = mapper;
+            _userManager = userManager;
+            _logger = logger;
+            _context = context;
         }
+
+
+
+        // === NUEVO MÉTODO PARA VER PERMISOS ===
+        [Authorize]
+        public async Task<IActionResult> ViewMyPermissions()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                _logger.LogWarning("Usuario no encontrado");
+                _notyfService.Error("Usuario no encontrado");
+                return RedirectToAction("Login");
+            }
+
+            // Obtener información completa de permisos
+            var permissionsInfo = await GetUserPermissionsAsync(user.Id);
+
+            // Mostrar en consola
+            LogPermissionsToConsole(permissionsInfo);
+
+            // También pasar a la vista
+            return View(permissionsInfo);
+        }
+
+        private async Task<object> GetUserPermissionsAsync(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+                throw new Exception("Usuario no encontrado");
+
+            // 1. Roles de Identity
+            var identityRoles = await _userManager.GetRolesAsync(user);
+
+            // 2. PrivateRole y Permisos personalizados
+            var privateRoleWithPermissions = await _context.Users
+                .Include(u => u.PrivateRole)
+                    .ThenInclude(pr => pr.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+                .Where(u => u.Id == userId)
+                .Select(u => new
+                {
+                    PrivateRole = u.PrivateRole,
+                    Permissions = u.PrivateRole != null ?
+                        u.PrivateRole.RolePermissions.Select(rp => rp.Permission).ToList() :
+                        new List<Permission>()
+                })
+                .FirstOrDefaultAsync();
+
+            // 3. Claims de Identity
+            var claims = await _userManager.GetClaimsAsync(user);
+
+            return new
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                FullName = user.FullName,
+                IdentityRoles = identityRoles,
+                PrivateRole = privateRoleWithPermissions?.PrivateRole,
+                CustomPermissions = privateRoleWithPermissions?.Permissions ?? new List<Permission>(),
+                IdentityClaims = claims
+            };
+        }
+
+        private void LogPermissionsToConsole(object permissionsInfo)
+        {
+            try
+            {
+                dynamic info = permissionsInfo;
+
+                Console.WriteLine("\n" + new string('=', 50));
+                Console.WriteLine("🎯 PERMISOS DEL USUARIO ACTUAL");
+                Console.WriteLine(new string('=', 50));
+
+                Console.WriteLine($"👤 USUARIO: {info.FullName}");
+                Console.WriteLine($"📧 Email: {info.Email}");
+                Console.WriteLine($"🆔 ID: {info.UserId}");
+                Console.WriteLine();
+
+                // Roles de Identity
+                Console.WriteLine("🔐 ROLES DE IDENTITY:");
+                if (info.IdentityRoles.Count > 0)
+                {
+                    foreach (string role in info.IdentityRoles)
+                    {
+                        Console.WriteLine($"   ✅ {role}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("   ❌ No tiene roles de Identity");
+                }
+
+                Console.WriteLine();
+
+                // PrivateRole - SOLO Name (NO tiene Description)
+                Console.WriteLine("🎯 ROL PERSONALIZADO:");
+                if (info.PrivateRole != null)
+                {
+                    Console.WriteLine($"   📝 {info.PrivateRole.Name}");
+                }
+                else
+                {
+                    Console.WriteLine("   ❌ No tiene rol personalizado asignado");
+                }
+
+                Console.WriteLine();
+
+                // Permisos personalizados - Permission SÍ tiene Description y Module
+                Console.WriteLine("📋 PERMISOS PERSONALIZADOS:");
+                if (info.CustomPermissions.Count > 0)
+                {
+                    foreach (var permission in info.CustomPermissions)
+                    {
+                        Console.WriteLine($"   ✅ {permission.Name}");
+                        Console.WriteLine($"      📖 {permission.Description}");
+                        Console.WriteLine($"      🗂️  Módulo: {permission.Module}");
+                    }
+                    Console.WriteLine($"   📊 Total: {info.CustomPermissions.Count} permisos");
+                }
+                else
+                {
+                    Console.WriteLine("   ❌ No tiene permisos personalizados");
+                }
+
+                Console.WriteLine();
+
+                // Claims
+                Console.WriteLine("🏷️ CLAIMS DE IDENTITY:");
+                if (info.IdentityClaims.Count > 0)
+                {
+                    foreach (var claim in info.IdentityClaims)
+                    {
+                        Console.WriteLine($"   🔹 {claim.Type} = {claim.Value}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("   ❌ No tiene claims");
+                }
+
+                Console.WriteLine(new string('=', 50));
+                Console.WriteLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error al mostrar permisos: {ex.Message}");
+            }
+        }
+
+
+
+
+        // GET: /Users/Login
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: /Users/Login
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult>Login(LoginDTO dto)
+        {
+            if (ModelState.IsValid)
+            {
+                Response<Microsoft.AspNetCore.Identity.SignInResult> result = await _userService.LoginAsync(dto);
+                if (result.IsSuccess)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                ModelState.AddModelError(string.Empty, "Email o contraseña incorrectos");
+            }
+            return View(dto);
+        }
+
+        // Logout
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await _userService.LogoutAsync();
+            return RedirectToAction(nameof(Login));
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Register(UserDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+
+            var response = await _userService.CreateAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ViewBag.Message = "Error al registrar usuario: " + response.Message;
+                return View(dto);
+            }
+
+            ViewBag.Message = "Usuario registrado con éxito";
+            return RedirectToAction("Login", "User"); // o a otra vista si deseas
+        }
+
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
@@ -37,6 +268,7 @@ namespace SlotWise.Web.Controllers
                 return View(new PaginationResponse<UserDTO>());
             }
         }
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Create()
         {
@@ -59,7 +291,7 @@ namespace SlotWise.Web.Controllers
             _notyfService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] Guid id)
         {
@@ -73,6 +305,7 @@ namespace SlotWise.Web.Controllers
 
             return View(response.Result);
         }
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Edit([FromForm] UserDTO dto)
         {

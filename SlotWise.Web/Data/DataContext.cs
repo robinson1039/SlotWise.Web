@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlotWise.Web.Data.Entities;
 
 namespace SlotWise.Web.Data
 {
-    public class DataContext : DbContext
+    // Contexto de la base de datos usamos IdentityDbContext para incluir la gestión de usuarios con un IdentityUser personalizado user 
+    public class DataContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
@@ -12,12 +15,17 @@ namespace SlotWise.Web.Data
         // Definición de las tablas en la base de datos
         // Cada DbSet representa una tabla
         public DbSet<Specialist> Specialist { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Service> Services { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<PrivateRole> PrivateRoles { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Llamar al método base para configurar las tablas de Identity
+            base.OnModelCreating(modelBuilder);
             // Configurar relación Reservation -> User
             modelBuilder.Entity<Reservation>().HasOne(r => r.User)
                 .WithMany(u => u.Reservations)
@@ -46,6 +54,17 @@ namespace SlotWise.Web.Data
             modelBuilder.Entity<Service>()
                 .Property(s => s.Price)
                 .HasPrecision(18, 2); // Precisión para decimal
+            // Configurar relación muchos a muchos entre PrivateRole y Permission a través de RolePermission
+            modelBuilder.Entity<RolePermission>()
+                .HasKey(rp => new { rp.PrivateRoleId, rp.PermissionId });
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.PrivateRole)
+                .WithMany(pr => pr.RolePermissions)
+                .HasForeignKey(rp => rp.PrivateRoleId);
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionId);
         }
     }
 }

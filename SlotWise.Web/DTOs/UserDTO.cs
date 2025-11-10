@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SlotWise.Web.DTOs
 {
@@ -12,8 +13,11 @@ namespace SlotWise.Web.DTOs
 
         [Display(Name = "Contraseña")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
-        public string PasswordHash { get; set; } = string.Empty;
-
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+        [Display(Name = "Email")]
+        [Required(ErrorMessage = "El campo {0} es requerido.")]
+        public string Email { get; set; } = string.Empty;
         [Display(Name = "Nombres")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
         public string FirstName { get; set; } = string.Empty;
@@ -28,13 +32,11 @@ namespace SlotWise.Web.DTOs
         [Display(Name = "Edad")]
         public int? Age { get; set; }
 
-        [Display(Name = "Reserva")]
-        public int? ReservaId { get; set; }
-
         [Display(Name = "Fecha de nacimiento")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
+        [DataType(DataType.Date)]
         public DateTime Birthdate { get; set; }
 
-        public DateTime CreateAt { get; set; }
+        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
     }
 }

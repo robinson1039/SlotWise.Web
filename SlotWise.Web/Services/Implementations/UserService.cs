@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using Azure.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using PrivateBlog.Web.Core;
 using SlotWise.Web.Core;
 using SlotWise.Web.Core.Pagination;
 using SlotWise.Web.Data;
 using SlotWise.Web.Data.Entities;
 using SlotWise.Web.DTOs;
 using SlotWise.Web.Services.Abstractions;
+using System.Security.Claims;
 
 namespace SlotWise.Web.Services.Implementations
 {
@@ -14,28 +17,122 @@ namespace SlotWise.Web.Services.Implementations
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        public UserService(DataContext context, IMapper mapper) : base(context, mapper)
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public UserService(DataContext context, UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(context, mapper)
         {
             _context = context;
             _mapper = mapper;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _httpContextAccessor = httpContextAccessor;
+
+        }
+        public async Task<Response<IdentityResult>> AddUserAsync(User user, string password)
+        {
+            IdentityResult result = await _userManager.CreateAsync(user, password);
+
+            return new Response<IdentityResult>
+            {
+                Result = result,
+                IsSuccess = result.Succeeded,
+            };
         }
 
+        public async Task<Response<string>> GenerateConfirmationTokenAsync(User user)
+        {
+            string result = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            return Response<string>.Success(result);
+        }
+        // Confirmar usuario con el token
+        public async Task<Response<IdentityResult>> ConfirmUserAsync(User user, string token)
+        {
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, token);
+
+            return new Response<IdentityResult>
+            {
+                Result = result,
+                IsSuccess = result.Succeeded,
+            };
+        }
+        public bool CurrentUserIsAuthenticaded()
+        {
+            ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
+            return user?.Identity is not null && user.Identity.IsAuthenticated;
+        }
+        public async Task<bool> CurrentUserIsAuthorizedAsync(string permission, string module)
+        {
+            ClaimsPrincipal? claimsUser = _httpContextAccessor.HttpContext?.User;
+
+            // Valida si hay sesión
+            if (claimsUser is null)
+            {
+                return false;
+            }
+
+            string userName = claimsUser.Identity!.Name!;
+
+            User? user = await GetUserByEmailasync(userName);
+
+            if (user is null)
+            {
+                return false;
+            }
+
+            if (user.PrivateRole.Name == Env.SUPER_ADMIN_ROLE_NAME)
+            {
+                return true;
+            }
+
+            return await _context.Permissions.Include(p => p.RolePermissions)
+                                             .AnyAsync(p => (p.Module == module && p.Name == permission)
+                                                            && p.RolePermissions.Any(rp => rp.PrivateRoleId == user.PrivateRoleId));
+        }
+        public async Task<User> GetUserByEmailasync(string email)
+        {
+            return await _context.Users.Include(u => u.PrivateRole)
+                                       .FirstOrDefaultAsync(u => u.Email == email);
+        }
+        public async Task<Response<SignInResult>>LoginAsync(LoginDTO dto)
+        {
+            SignInResult result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, lockoutOnFailure: false);
+            return new Response<SignInResult>
+            {
+                Result = result,
+                IsSuccess = result.Succeeded,
+            };
+        }
+        public async Task LogoutAsync()
+        {
+            await _signInManager.SignOutAsync();
+        }
         public async Task<Response<UserDTO>> CreateAsync(UserDTO dto)
         {
             try
             {
-                User user = new User
+                var userRole = await _context.PrivateRoles
+                .FirstOrDefaultAsync(r => r.Name == "Usuario");
+
+                if (userRole == null)
+                {
+                    return Response<UserDTO>.Failure("El rol 'Usuario' no existe en la base de datos.");
+                }
+                var user = new User
                 {
                     Id = Guid.NewGuid(),
                     UserName = dto.UserName,
-                    PasswordHash = dto.PasswordHash,
+                    Email = dto.Email,
                     FirstName = dto.FirstName,
                     LastName = dto.LastName,
                     CC = dto.CC,
                     Age = dto.Age,
                     Birthdate = dto.Birthdate,
-                    CreateAt = DateTime.UtcNow
+                    CreateAt = DateTime.UtcNow,
+                    PrivateRoleId = userRole.Id, // <-- Set this to a valid value as needed
                 };
+                var result = await _userManager.CreateAsync(user, dto.Password);
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
                 dto.Id = user.Id;
@@ -163,6 +260,10 @@ namespace SlotWise.Web.Services.Implementations
             }
 
             return await GetPaginationAsync<User, UserDTO>(request, query);
+        }
+        private async Task<User> GetUserAsync(string? id)
+        {
+            return await _context.Users.FindAsync(id);
         }
     }
 }

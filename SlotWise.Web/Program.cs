@@ -18,11 +18,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Middleware
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Routing and Authorization
+app.UseAuthentication();
 app.UseRouting();
-
 app.UseAuthorization();
 app.UseNotyf();
 
@@ -30,5 +32,5 @@ app.UseNotyf();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.AddCustomWebApplicationConfiguration();
 app.Run();
