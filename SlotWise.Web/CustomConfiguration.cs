@@ -7,6 +7,8 @@ using SlotWise.Web.Core;
 using SlotWise.Web.Data;
 using SlotWise.Web.Data.Entities;
 using SlotWise.Web.Data.Seeders;
+using SlotWise.Web.Helpers.Abstractions;
+using SlotWise.Web.Helpers.Implementations;
 using SlotWise.Web.Services;
 using SlotWise.Web.Services.Abstractions;
 using SlotWise.Web.Services.Implementations;
@@ -18,7 +20,8 @@ namespace SlotWise.Web
         public static WebApplicationBuilder AddCustomConfiguration(this WebApplicationBuilder builder)
         {
             //  1. Cargar el archivo .env (antes de usar la configuración)
-            Env.Load();
+            DotNetEnv.Env.Load();
+
 
             //  2. Leer la variable desde el .env
             var envConnection = Environment.GetEnvironmentVariable("MY_DB_CONNECTION");
@@ -31,7 +34,7 @@ namespace SlotWise.Web
 
             //  4. Verificar qué conexión se está usando
             string? cnn = builder.Configuration.GetConnectionString("MyConnection");
-            Console.WriteLine($"🟢 Usando conexión: {cnn}");
+            Console.WriteLine($" Usando conexión: {cnn}");
 
             //  5. Configurar DbContext con la conexión ya inyectada
             builder.Services.AddDbContext<DataContext>(options =>
@@ -82,8 +85,8 @@ namespace SlotWise.Web
             {
                 options.Cookie.Name = "SlotWise.Auth.Cookie";
                 options.ExpireTimeSpan = TimeSpan.FromDays(3);
-                options.LoginPath = "/Account/Login";
-                options.LogoutPath = "/Account/Logout";
+                options.LoginPath = "/User/Login";
+                options.LogoutPath = "/User/Logout";
                 options.AccessDeniedPath = "/Error/403";
             });
         }
@@ -99,6 +102,8 @@ namespace SlotWise.Web
             builder.Services.AddScoped<IReservationService, ReservationService>();
             builder.Services.AddScoped<CustomQueryableOperationsService>();
             builder.Services.AddTransient<SeedDb>();
+            builder.Services.AddScoped<IRolesHelper, RolesHelper>();
+
 
         }
 

@@ -15,6 +15,7 @@ namespace SlotWise.Web.Data.Seeders
 
         public async Task SeedAsync()
         {
+            await new PermissionsSeeder(_context).SeedAsync();
             await new ServiceSeeder(_context).SeedAsync();
             await new SpecialistSeeder(_context).SeedAsync();
             await new UserRolesSeeder(_context, _usersService).SeedAsync();
@@ -22,3 +23,5 @@ namespace SlotWise.Web.Data.Seeders
         }
     }
 }
+
+

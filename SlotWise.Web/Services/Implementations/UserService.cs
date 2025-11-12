@@ -2,7 +2,6 @@
 using Azure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using PrivateBlog.Web.Core;
 using SlotWise.Web.Core;
 using SlotWise.Web.Core.Pagination;
 using SlotWise.Web.Data;

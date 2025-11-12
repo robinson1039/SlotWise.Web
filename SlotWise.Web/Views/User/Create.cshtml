@@ -95,6 +95,18 @@
                     </div>
                 </div>
 
+                <!-- Rol -->
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="PrivateRoleId" asp-items="ViewBag.Roles" class="form-select">
+                            <option value="">-- Selecciona un rol --</option>
+                        </select>
+                        <label for="PrivateRoleId">Rol</label>
+                        <span asp-validation-for="PrivateRoleId" class="text-danger"></span>
+                    </div>
+                </div>
+
+
                 <!-- Botones -->
                 <div class="text-center mt-3">
                     <button class="btn btn-primary" type="submit">
@@ -104,6 +116,7 @@
                         <i class="bi bi-arrow-left"></i> Volver
                     </a>
                 </div>
+
             </form>
         </div>
     </div>

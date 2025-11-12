@@ -1,4 +1,4 @@
-﻿namespace PrivateBlog.Web.Core
+﻿namespace SlotWise.Web.Core
 {
     public static class Env
     {

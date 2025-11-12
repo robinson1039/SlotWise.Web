@@ -1,6 +1,9 @@
-﻿namespace SlotWise.Web.Core.Pagination
+﻿using SlotWise.Web.Core.Pagination.Abstractions;
+
+namespace SlotWise.Web.Core.Pagination
+
 {
-    public class PaginationResponse<T>
+    public class PaginationResponse<T>: IPagination
     {
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
@@ -17,6 +20,10 @@
         {
             get
             {
+                // ✅ Si no hay páginas (sin datos o error en cálculo), devolvemos una lista vacía.
+                if (TotalPages <= 0)
+                    return new List<int>();
+
                 List<int> pages = new List<int>();
 
                 int half = (VisiblePages / 2);
@@ -53,6 +60,7 @@
                 return pages;
             }
         }
+
 
         public PagedList<T> List { get; set; } = new PagedList<T>();
     }

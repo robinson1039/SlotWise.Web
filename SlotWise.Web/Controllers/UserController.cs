@@ -9,11 +9,13 @@ using SlotWise.Web.Core.Pagination;
 using SlotWise.Web.Data;
 using SlotWise.Web.Data.Entities;
 using SlotWise.Web.DTOs;
+using SlotWise.Web.Helpers.Abstractions;
 using SlotWise.Web.Services.Abstractions;
 
 namespace SlotWise.Web.Controllers
 {
     [Authorize(Roles = "Admin")]
+    //[Authorize]
     public class UserController : Controller
     {
         private readonly DataContext _context;
@@ -22,7 +24,9 @@ namespace SlotWise.Web.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<UserController> _logger;
-        public UserController(IUserService userService, INotyfService notyfService, IMapper mapper, UserManager<User> userManager, ILogger<UserController> logger, DataContext context )
+        private readonly IRolesHelper _rolesHelper;
+        public UserController(IUserService userService, INotyfService notyfService, IMapper mapper, UserManager<User> userManager, ILogger<UserController> logger,
+            DataContext context, IRolesHelper rolesHelper )
         {
             _userService = userService;
             _notyfService = notyfService;
@@ -30,6 +34,36 @@ namespace SlotWise.Web.Controllers
             _userManager = userManager;
             _logger = logger;
             _context = context;
+            _rolesHelper= rolesHelper;
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.Roles = await _rolesHelper.GetComboRolesAsync();
+            return View();
+        }
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Create(UserDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Roles = await _rolesHelper.GetComboRolesAsync();
+                return View(dto);
+            }
+
+            Response<UserDTO> response = await _userService.CreateAsync(dto);
+            if (!response.IsSuccess)
+            {
+                ViewBag.Roles = await _rolesHelper.GetComboRolesAsync();
+                _notyfService.Error(response.Message);
+                return View(dto);
+            }
+
+            _notyfService.Success(response.Message);
+            return RedirectToAction(nameof(Index));
         }
 
 
@@ -38,7 +72,7 @@ namespace SlotWise.Web.Controllers
         [Authorize]
         public async Task<IActionResult> ViewMyPermissions()
         {
-            var user = await _userManager.GetUserAsync(User);
+            User? user = await _userManager.GetUserAsync(User);
 
             if (user == null)
             {
@@ -48,7 +82,7 @@ namespace SlotWise.Web.Controllers
             }
 
             // Obtener información completa de permisos
-            var permissionsInfo = await GetUserPermissionsAsync(user.Id);
+            object permissionsInfo = await GetUserPermissionsAsync(user.Id);
 
             // Mostrar en consola
             LogPermissionsToConsole(permissionsInfo);
@@ -59,13 +93,13 @@ namespace SlotWise.Web.Controllers
 
         private async Task<object> GetUserPermissionsAsync(Guid userId)
         {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
+            User? user = await _userManager.FindByIdAsync(userId.ToString());
 
             if (user == null)
                 throw new Exception("Usuario no encontrado");
 
             // 1. Roles de Identity
-            var identityRoles = await _userManager.GetRolesAsync(user);
+            IList<string> identityRoles = await _userManager.GetRolesAsync(user);
 
             // 2. PrivateRole y Permisos personalizados
             var privateRoleWithPermissions = await _context.Users
@@ -83,7 +117,7 @@ namespace SlotWise.Web.Controllers
                 .FirstOrDefaultAsync();
 
             // 3. Claims de Identity
-            var claims = await _userManager.GetClaimsAsync(user);
+            IList<System.Security.Claims.Claim> claims = await _userManager.GetClaimsAsync(user);
 
             return new
             {
@@ -268,29 +302,29 @@ namespace SlotWise.Web.Controllers
                 return View(new PaginationResponse<UserDTO>());
             }
         }
-        [AllowAnonymous]
-        [HttpGet]
-        public IActionResult Create()
-        {
-            return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> Create([FromForm] UserDTO dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                _notyfService.Error("Debe ajustar los errores de validación");
-                return View(dto);
-            }
-            Response<UserDTO> response = await _userService.CreateAsync(dto);
-            if (!response.IsSuccess)
-            {
-                _notyfService.Error(response.Message);
-                return View(dto);
-            }
-            _notyfService.Success(response.Message);
-            return RedirectToAction(nameof(Index));
-        }
+        //[AllowAnonymous]
+        //[HttpGet]
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromForm] UserDTO dto)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        _notyfService.Error("Debe ajustar los errores de validación");
+        //        return View(dto);
+        //    }
+        //    Response<UserDTO> response = await _userService.CreateAsync(dto);
+        //    if (!response.IsSuccess)
+        //    {
+        //        _notyfService.Error(response.Message);
+        //        return View(dto);
+        //    }
+        //    _notyfService.Success(response.Message);
+        //    return RedirectToAction(nameof(Index));
+        //}
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] Guid id)

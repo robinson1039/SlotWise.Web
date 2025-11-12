@@ -33,20 +33,20 @@ namespace SlotWise.Web.Data.Seeders
         {
             return new List<Permission>
             {
-                new Permission { Id = Guid.NewGuid(), Name = "showBlogs", Description = "Ver Blogs", Module = "Blogs"},
-                new Permission { Id = Guid.NewGuid(), Name = "createBlogs", Description = "Crear Blogs", Module = "Blogs"},
-                new Permission { Id = Guid.NewGuid(), Name = "updateBlogs", Description = "Editar Blogs", Module = "Blogs"},
-                new Permission { Id = Guid.NewGuid(), Name = "deleteBlogs", Description = "Eliminar Blogs", Module = "Blogs"},
+                new Permission { Id = Guid.NewGuid(), Name = "showServices", Description = "Ver servicio", Module = "Service"},
+                new Permission { Id = Guid.NewGuid(), Name = "createServices", Description = "Crear servicio", Module = "Service"},
+                new Permission { Id = Guid.NewGuid(), Name = "updateServices", Description = "Editar servicio", Module = "Service"},
+                new Permission { Id = Guid.NewGuid(), Name = "deleteServices", Description = "Eliminar servicio", Module = "Service"},
             };
         }
         private List<Permission> Reservation()
         {
             return new List<Permission>
             {
-                new Permission { Id = Guid.NewGuid(), Name = "showRoles", Description = "Ver Roles", Module = "Roles"},
-                new Permission { Id = Guid.NewGuid(), Name = "createRoles", Description = "Crear Roles", Module = "Roles"},
-                new Permission { Id = Guid.NewGuid(), Name = "updateRoles", Description = "Editar Roles", Module = "Roles"},
-                new Permission { Id = Guid.NewGuid(), Name = "deleteRoles", Description = "Eliminar Roles", Module = "Roles"},
+                new Permission { Id = Guid.NewGuid(), Name = "showReservations", Description = "Ver reservacion", Module = "Reservation"},
+                new Permission { Id = Guid.NewGuid(), Name = "createReservations", Description = "Crear reservacion", Module = "Reservation"},
+                new Permission { Id = Guid.NewGuid(), Name = "updateReservations", Description = "Editar reservacion", Module = "Reservation"},
+                new Permission { Id = Guid.NewGuid(), Name = "deleteReservations", Description = "Eliminar reservacion", Module = "Reservation"},
             };
         }
 

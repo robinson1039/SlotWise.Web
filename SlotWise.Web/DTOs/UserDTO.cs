@@ -35,6 +35,9 @@ namespace SlotWise.Web.DTOs
         [Display(Name = "Fecha de nacimiento")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
         [DataType(DataType.Date)]
+
+        public Guid? PrivateRoleId { get; set; }
+
         public DateTime Birthdate { get; set; }
 
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;

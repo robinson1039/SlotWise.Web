@@ -10,11 +10,6 @@ namespace SlotWise.Web.Core.Pagination
         public int RecordsPerPage { get; set; }
         public int TotalCount { get; set; }
 
-        public PagedList()
-        {
-
-        }
-
         public PagedList(List<T> items, int count, int pageNumber, int recordsPerPage)
         {
             TotalCount = count;
@@ -22,6 +17,10 @@ namespace SlotWise.Web.Core.Pagination
             CurrentPage = pageNumber;
             TotalPages = (int)Math.Ceiling(count / (double)recordsPerPage);
             AddRange(items);
+        }
+
+        public PagedList()
+        {
         }
 
         public static async Task<PagedList<T>> ToPagedListAsync(IQueryable<T> queryable, PaginationRequest request)

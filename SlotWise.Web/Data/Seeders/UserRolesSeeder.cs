@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PrivateBlog.Web.Core;
+using SlotWise.Web.Core;
 using SlotWise.Web.Data.Entities;
 using SlotWise.Web.Services.Abstractions;
 
@@ -9,7 +9,7 @@ namespace SlotWise.Web.Data.Seeders
     {
         private readonly DataContext _context;
         private readonly IUserService _usersService;
-        private const string CONTENT_MANAGER_ROLE_NAME = "Administrador";
+        private const string EMPLOYEE_ROLE_NAME = "Employee";
         private const string BASIC_ROLE_NAME = "Basic";
 
         public UserRolesSeeder(DataContext context, IUserService usersService)
@@ -28,7 +28,7 @@ namespace SlotWise.Web.Data.Seeders
         {
             await AdminRoleAsync();
             await BasicRoleAsync();
-            await ContentManagerRoleAsync();
+            await EmployeeRoleAsync();
         }
 
         private async Task CheckUsersAsync()
@@ -63,7 +63,7 @@ namespace SlotWise.Web.Data.Seeders
 
             if (user is null)
             {
-                PrivateRole employeeManagerRole = await _context.PrivateRoles.FirstOrDefaultAsync(r => r.Name == CONTENT_MANAGER_ROLE_NAME);
+                PrivateRole employeeManagerRole = await _context.PrivateRoles.FirstOrDefaultAsync(r => r.Name == EMPLOYEE_ROLE_NAME);
 
                 user = new User
                 {
@@ -130,21 +130,22 @@ namespace SlotWise.Web.Data.Seeders
                 await _context.SaveChangesAsync();
             }
         }
-        private async Task ContentManagerRoleAsync()
+        private async Task EmployeeRoleAsync()
         {
-            bool exists = await _context.PrivateRoles.AnyAsync(r => r.Name == CONTENT_MANAGER_ROLE_NAME);
+            bool exists = await _context.PrivateRoles.AnyAsync(r => r.Name == EMPLOYEE_ROLE_NAME);
 
             if (!exists)
             {
-                PrivateRole role = new PrivateRole { Id = Guid.NewGuid(), Name = CONTENT_MANAGER_ROLE_NAME };
+                PrivateRole role = new PrivateRole { Id = Guid.NewGuid(), Name = EMPLOYEE_ROLE_NAME };
                 await _context.PrivateRoles.AddAsync(role);
 
                 List<Permission> permissions = await _context.Permissions.Where(p => p.Module == "Reservation" || p.Module == "Service" || p.Module == "Specialist" || p.Module == "User")
                                                                          .ToListAsync();
                 foreach (Permission permission in permissions)
                 {
-                    await _context.RolePermissions.AddAsync(new RolePermission { 
-                        PermissionId = permission.Id, 
+                    await _context.RolePermissions.AddAsync(new RolePermission
+                    {
+                        PermissionId = permission.Id,
                         PrivateRoleId = role.Id
                     });
                 }

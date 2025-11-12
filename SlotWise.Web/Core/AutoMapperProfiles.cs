@@ -8,6 +8,7 @@ namespace SlotWise.Web.Core
     {
         public AutoMapperProfiles()
         {
+
             CreateMap<Specialist, SpecialistDTO>()
                 .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.Create_at))
                 .ReverseMap();
@@ -26,6 +27,8 @@ namespace SlotWise.Web.Core
                .ForMember(dest => dest.User, opt => opt.Ignore()) // Ignorar la navegación al mapear de vuelta
                .ForMember(dest => dest.Specialist, opt => opt.Ignore()) // Ignorar la navegación al mapear de vuelta
                .ForMember(dest => dest.Service, opt => opt.Ignore()); // Ignorar la navegación al mapear de vuelta
+            CreateMap<PrivateRole, RolesDTO>().ReverseMap();
+
 
         }
     }
