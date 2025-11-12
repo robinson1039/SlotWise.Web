@@ -219,5 +219,16 @@ namespace SlotWise.Web.Services.Implementations
 
             return Response<List<PermissionForRolesDTO>>.Success(permissions);
         }
+        public async Task<Response<List<RolesDTO>>> GetAllAsync()
+        {
+            var roles = await _context.PrivateRoles.ToListAsync();
+            var rolesDTO = _mapper.Map<List<RolesDTO>>(roles);
+
+            return new Response<List<RolesDTO>>
+            {
+                IsSuccess = true,
+                Result = rolesDTO
+            };
+        }
     }
 }

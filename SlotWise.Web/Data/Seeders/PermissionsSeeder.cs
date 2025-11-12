@@ -14,7 +14,7 @@ namespace SlotWise.Web.Data.Seeders
 
         public async Task SeedAsync()
         {
-            List<Permission> permissions = [.. Services(), .. Reservation(), .. Roles()];
+            List<Permission> permissions = [.. Services(), .. Reservation(), .. Especialistas(), .. Usuarios()];
 
             foreach (Permission permission in permissions)
             {
@@ -43,22 +43,32 @@ namespace SlotWise.Web.Data.Seeders
         {
             return new List<Permission>
             {
-                new Permission { Id = Guid.NewGuid(), Name = "showReservations", Description = "Ver reservacion", Module = "Reservation"},
-                new Permission { Id = Guid.NewGuid(), Name = "createReservations", Description = "Crear reservacion", Module = "Reservation"},
-                new Permission { Id = Guid.NewGuid(), Name = "updateReservations", Description = "Editar reservacion", Module = "Reservation"},
-                new Permission { Id = Guid.NewGuid(), Name = "deleteReservations", Description = "Eliminar reservacion", Module = "Reservation"},
+                new Permission { Id = Guid.NewGuid(), Name = "showReservations", Description = "Ver reservacion", Module = "Reservacion"},
+                new Permission { Id = Guid.NewGuid(), Name = "createReservations", Description = "Crear reservacion", Module = "Reservacion"},
+                new Permission { Id = Guid.NewGuid(), Name = "updateReservations", Description = "Editar reservacion", Module = "Reservacion"},
+                new Permission { Id = Guid.NewGuid(), Name = "deleteReservations", Description = "Eliminar reservacion", Module = "Reservacion"},
             };
         }
-
-        private List<Permission> Roles()
+        private List<Permission> Especialistas()
+        {
+            return new List<Permission> //me faltó quitar la E en Especialists 
+            {
+                new Permission { Id = Guid.NewGuid(), Name = "showEspecialists", Description = "Ver especialistas", Module = "Especialistas" },
+                new Permission { Id = Guid.NewGuid(), Name = "createEspecialists", Description = "Crear especialistas", Module = "Especialistas" },
+                new Permission { Id = Guid.NewGuid(), Name = "updateEspecialists", Description = "Editar especialistas", Module = "Especialistas" },
+                new Permission { Id = Guid.NewGuid(), Name = "deleteEspecialists", Description = "Eliminar especialistas", Module = "Especialistas" },
+            };
+        }
+        private List<Permission> Usuarios()
         {
             return new List<Permission>
             {
-                new Permission { Name = "showSections", Description = "Ver Secciones", Module = "Secciones"},
-                new Permission { Name = "createSections", Description = "Crear Secciones", Module = "Secciones"},
-                new Permission { Name = "updateSections", Description = "Editar Secciones", Module = "Secciones"},
-                new Permission { Name = "deleteSections", Description = "Eliminar Secciones", Module = "Secciones"},
+                new Permission { Id = Guid.NewGuid(), Name = "showUsers", Description = "Ver usuarios", Module = "Usuarios" },
+                new Permission { Id = Guid.NewGuid(), Name = "createUsers", Description = "Crear usuarios", Module = "Usuarios" },
+                new Permission { Id = Guid.NewGuid(), Name = "updateUsers", Description = "Editar usuarios", Module = "Usuarios" },
+                new Permission { Id = Guid.NewGuid(), Name = "deleteUsers", Description = "Eliminar usuarios", Module = "Usuarios" },
             };
         }
+
     }
 }

@@ -22,9 +22,9 @@ namespace SlotWise.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
+        public async Task<IActionResult> Index()
         {
-            Response<PaginationResponse<RolesDTO>> response = await _rolesService.GetPaginatedListAsync(request);
+            var response = await _rolesService.GetAllAsync();
             return View(response.Result);
         }
 

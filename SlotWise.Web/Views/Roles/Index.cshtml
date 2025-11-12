@@ -1,7 +1,7 @@
 ﻿@using SlotWise.Web.Core.Pagination
 @using SlotWise.Web.Core
 @using SlotWise.Web.DTOs
-@model PaginationResponse<RolesDTO>
+@model List<SlotWise.Web.DTOs.RolesDTO>
 
 @inject SlotWise.Web.Services.Abstractions.IUserService _usersService
 
@@ -33,87 +33,56 @@
                         <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i></a>
                     </div>
                 }
-
             </div>
         </div>
 
         <div class="card-body mt-2">
 
-            <form asp-action="Index" class="navbar-search" method="GET">
-
-                <input type="hidden" name="Page" value="@Model.CurrentPage" />
-
-                <div class="row mt-3">
-                    <div class="col-md-auto">
-
-                        <select name="RecordsPerPage" class="form-select bg-light border-0 small" asp-for="RecordsPerPage">
-                            <option value="2" selected="@(Model.RecordsPerPage == 2)">2</option>
-                            <option value="10" selected="@(Model.RecordsPerPage == 10)">10</option>
-                            <option value="15" selected="@(Model.RecordsPerPage == 15)">15</option>
-                            <option value="30" selected="@(Model.RecordsPerPage == 30)">30</option>
-                            <option value="50" selected="@(Model.RecordsPerPage == 50)">50</option>
-                        </select>
-
-                    </div>
-
-                    <div class="col-md-10">
-                        <div class="input-group-mb-3">
-                            <input type="text"
-                                   class="form-control bg-light border-0 small"
-                                   placeholder="Buscar..."
-                                   aria-label="search"
-                                   asp-for="Filter">
-                        </div>
-                    </div>
-
-                    <div class="col-md-auto">
-
-                        <div class="input-group-mb-3">
-                            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
-                        </div>
-                    </div>
-
-                </div>
-
-            </form>
-
             <table class="table table-bordered mt-2">
                 <thead>
                     <tr>
-                        <th> Rol </th>
-                        <th></th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.List)
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                <td>
+                                    @if (item.Name != "SUPER_ADMIN")
+                                    {
+                                        @if (await _usersService.CurrentUserIsAuthorizedAsync("updateRoles", "Roles"))
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </a>
+                                        }
+
+                                        @if (await _usersService.CurrentUserIsAuthorizedAsync("deleteRoles", "Roles"))
+                                        {
+                                            <form asp-action="Delete" asp-route-id="@item.Id" style="display:inline;">
+                                                <button class="btn btn-danger btn-sm btnDelete">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td> @Html.DisplayFor(modelItem => item.Name) </td>
-
-                            <td>
-
-                                @if (item.Name != Env.SUPER_ADMIN_ROLE_NAME)
-                                {
-                                    @if (await _usersService.CurrentUserIsAuthorizedAsync("updateRoles", "Roles"))
-                                    {
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i></a>
-                                    }
-
-                                    @if (await _usersService.CurrentUserIsAuthorizedAsync("deleteRoles", "Roles"))
-                                    {
-                                        <form asp-action="Delete" asp-route-id="@item.Id" style="display:contents">
-                                            <button class="btn btn-danger btn-sm btnDelete"><i class="bi bi-trash-fill"></i></button>
-                                        </form>
-                                    }
-                                }
-                            </td>
-
+                            <td colspan="2" class="text-center">No hay roles registrados.</td>
                         </tr>
                     }
                 </tbody>
             </table>
-
-            @await Html.PartialAsync("_PaginationComponent", Model)
 
         </div>
     </div>
@@ -121,32 +90,22 @@
 
 @section Scripts {
     <script>
-
         $(document).ready(function () {
-
             $('.btnDelete').click(function (event) {
-
                 event.preventDefault();
 
                 Swal.fire({
                     title: "¿Desea eliminar el Rol?",
-                    text: "No prodrá revertirlo",
+                    text: "No podrá revertirlo",
                     icon: "question",
                     showCancelButton: true,
                 }).then((result) => {
-
                     if (result.isConfirmed) {
-
                         const form = $(this).closest('form');
-
                         form.submit();
                     }
-
                 });
-
             });
-
         });
-
     </script>
 }

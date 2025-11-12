@@ -117,8 +117,24 @@ namespace SlotWise.Web.Data.Seeders
                 PrivateRole role = new PrivateRole { Id = Guid.NewGuid(), Name = Env.SUPER_ADMIN_ROLE_NAME };
                 await _context.PrivateRoles.AddAsync(role);
                 await _context.SaveChangesAsync();
+
+                //ADMIN TIENE TODOS LOS PERMISOS
+                List<Permission> allPermissions = await _context.Permissions.ToListAsync();
+                foreach (Permission permission in allPermissions)
+                {
+                    await _context.RolePermissions.AddAsync(new RolePermission
+                    {
+                        PermissionId = permission.Id,
+                        PrivateRoleId = role.Id
+                    });
+                }
+
+                await _context.SaveChangesAsync();
             }
+        
+
         }
+        
         private async Task BasicRoleAsync()
         {
             bool exists = await _context.PrivateRoles.AnyAsync(r => r.Name == BASIC_ROLE_NAME);
@@ -128,8 +144,24 @@ namespace SlotWise.Web.Data.Seeders
                 PrivateRole role = new PrivateRole { Id = Guid.NewGuid(), Name = BASIC_ROLE_NAME };
                 await _context.PrivateRoles.AddAsync(role);
                 await _context.SaveChangesAsync();
+
+                List<Permission> viewPermissions = await _context.Permissions
+                    .Where(p => p.Name.StartsWith("show"))
+                    .ToListAsync();
+
+                foreach (Permission permission in viewPermissions)
+                {
+                    await _context.RolePermissions.AddAsync(new RolePermission
+                    {
+                        PermissionId = permission.Id,
+                        PrivateRoleId = role.Id
+                    });
+                }
+
+                await _context.SaveChangesAsync();
             }
         }
+        
         private async Task EmployeeRoleAsync()
         {
             bool exists = await _context.PrivateRoles.AnyAsync(r => r.Name == EMPLOYEE_ROLE_NAME);
@@ -138,10 +170,15 @@ namespace SlotWise.Web.Data.Seeders
             {
                 PrivateRole role = new PrivateRole { Id = Guid.NewGuid(), Name = EMPLOYEE_ROLE_NAME };
                 await _context.PrivateRoles.AddAsync(role);
+                await _context.SaveChangesAsync();
 
-                List<Permission> permissions = await _context.Permissions.Where(p => p.Module == "Reservation" || p.Module == "Service" || p.Module == "Specialist" || p.Module == "User")
-                                                                         .ToListAsync();
-                foreach (Permission permission in permissions)
+                List<Permission> employeePermissions = await _context.Permissions
+                    .Where(p => p.Name.StartsWith("show") ||
+                                p.Name.StartsWith("create") ||
+                                p.Name.StartsWith("update"))
+                    .ToListAsync();
+
+                foreach (Permission permission in employeePermissions)
                 {
                     await _context.RolePermissions.AddAsync(new RolePermission
                     {

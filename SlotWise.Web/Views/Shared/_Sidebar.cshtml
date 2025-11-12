@@ -1,4 +1,5 @@
-﻿<!-- ======= Sidebar ======= -->
+﻿@inject SlotWise.Web.Services.Abstractions.IUserService _userService
+<!-- ======= Sidebar ======= -->
 <aside id="sidebar" class="sidebar">
 
     <ul class="sidebar-nav" id="sidebar-nav">
@@ -9,27 +10,54 @@
                 <span>Inicio</span>
             </a>
         </li>
+        @if (await _userService.CurrentUserIsAuthorizedAsync("showEspecialists", "Especialistas"))
+        {
+            <li class="nav-item">
+                <a class="nav-link collapsed" asp-controller="Specialist" asp-action="Index">
+                    <i class="bi bi-person-badge"></i> <span>Especialistas</span>
+                </a>
+            </li>
+        }
+        @if (await _userService.CurrentUserIsAuthorizedAsync("showUsers", "Usuarios"))
+        {
+            <li class="nav-item">
+                <a class="nav-link collapsed" asp-controller="User" asp-action="Index">
+                    <i class="bi bi-person"></i> <span>Usuario</span>
+                </a>
+            </li>
+        }
+        @if (await _userService.CurrentUserIsAuthorizedAsync("showServices", "Service"))
+        {
+            <li class="nav-item">
+                <a class="nav-link collapsed" asp-controller="Service" asp-action="Index">
+                    <i class="bi bi-clipboard-check"></i> <span>Servicios</span>
+                </a>
+            </li>
+        }
+        @if (await _userService.CurrentUserIsAuthorizedAsync("showReservations", "Reservacion"))
+        {
+            <li class="nav-item">
+                <a class="nav-link collapsed" asp-controller="Reservation" asp-action="Index">
+                    <i class="bi bi-calendar-plus"></i> <span>Reserva</span>
+                </a>
+            </li>
+        }
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseRoles"
+               aria-expanded="false" aria-controls="collapseRoles">
+                <i class="fas fa-user-shield"></i>
+                <span>Roles</span>
+            </a>
+            <div id="collapseRoles" class="collapse" data-bs-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" asp-controller="Roles" asp-action="Index">Lista de Roles</a>
+                    <a class="collapse-item" asp-controller="Roles" asp-action="Create">Crear Rol</a>
+                </div>
+            </div>
+        </li>
 
-        <li class="nav-item">
-            <a class="nav-link collapsed" asp-controller="Specialist" asp-action="Index">
-                <i class="bi bi-person-badge"></i> <span>Especialistas</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link collapsed" asp-controller="User" asp-action="Index">
-                <i class="bi bi-person"></i> <span>Usuario</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link collapsed" asp-controller="Service" asp-action="Index">
-                <i class="bi bi-clipboard-check"></i> <span>Servicios</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link collapsed" asp-controller="Reservation" asp-action="Index">
-                <i class="bi bi-calendar-plus"></i> <span>Reserva</span>
-            </a>
-        </li>
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block">
 
         
         <li class="nav-item">

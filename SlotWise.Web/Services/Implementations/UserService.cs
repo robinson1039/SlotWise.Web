@@ -84,6 +84,9 @@ namespace SlotWise.Web.Services.Implementations
             {
                 return true;
             }
+            var test = await _context.Permissions.Include(p => p.RolePermissions)
+                                                .Where(p=>p.RolePermissions.Any(rp=>rp.PrivateRoleId ==user.PrivateRoleId))
+                                                .ToListAsync();
 
             return await _context.Permissions.Include(p => p.RolePermissions)
                                              .AnyAsync(p => (p.Module == module && p.Name == permission)

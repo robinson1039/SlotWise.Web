@@ -9,6 +9,7 @@ namespace SlotWise.Web.Services.Abstractions
         Task<Response<List<PermissionForRolesDTO>>> GetPermissionsAsync();
         Task<Response<RolesDTO>> CreateAsync(RolesDTO dto);
         Task<Response<RolesDTO>> EditAsync(RolesDTO dto);
+        Task<Response<List<RolesDTO>>> GetAllAsync();
         Task<Response<object>> DeleteAsync(Guid id);
         Task<Response<RolesDTO>> GetOneAsync(Guid id);
     }
