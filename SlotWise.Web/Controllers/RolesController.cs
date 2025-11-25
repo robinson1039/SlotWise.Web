@@ -9,7 +9,7 @@ using SlotWise.Web.Services.Implementations;
 
 namespace SlotWise.Web.Controllers
 {
-    [Authorize(Roles = "Admin")]
+   // [Authorize(Roles = "Admin")]
     public class RolesController : Controller
     {
         private readonly IRolesService _rolesService;
@@ -112,7 +112,7 @@ namespace SlotWise.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromQuery] Guid id)
         {
             var response = await _rolesService.DeleteAsync(id);
 

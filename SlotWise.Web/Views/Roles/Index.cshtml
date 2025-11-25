@@ -64,8 +64,8 @@
 
                                         @if (await _usersService.CurrentUserIsAuthorizedAsync("deleteRoles", "Roles"))
                                         {
-                                            <form asp-action="Delete" asp-route-id="@item.Id" style="display:inline;">
-                                                <button class="btn btn-danger btn-sm btnDelete">
+                                            <form method="post" asp-action="Delete" asp-route-id="@item.Id" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger btn-sm btnDelete">
                                                     <i class="bi bi-trash-fill"></i>
                                                 </button>
                                             </form>

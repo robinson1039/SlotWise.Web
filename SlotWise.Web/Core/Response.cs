@@ -23,18 +23,29 @@ namespace SlotWise.Web.Core
 
         public Response() { }
 
-        public static Response<T> Failure(Exception ex, string message = "Ha ocurrido un error al generar al solicitud")
+        public static Response<T> Failure(Exception ex, string message = "Ha ocurrido un error al generar la solicitud")
         {
+            var errors = new List<string>
+    {
+        ex.Message
+    };
+
+            if (ex.InnerException != null)
+            {
+                errors.Add("InnerException: " + ex.InnerException.Message);
+                errors.Add("InnerStackTrace: " + ex.InnerException.StackTrace);
+            }
+
+            errors.Add("StackTrace: " + ex.StackTrace);
+
             return new Response<T>
             {
                 IsSuccess = false,
                 Message = message,
-                Errors = new List<string>
-                {
-                    ex.Message,
-                }
+                Errors = errors
             };
         }
+
 
         public static Response<T> Failure(string message, List<string> errors = null)
         {

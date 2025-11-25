@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SlotWise.Web.Core;
 using SlotWise.Web.Core.Pagination;
@@ -12,13 +13,13 @@ namespace SlotWise.Web.Controllers
     {
         private readonly ISpecialistService _specialistService;
         private readonly INotyfService _notyfService;
-
+        
         public SpecialistController(ISpecialistService specialistService, INotyfService notyfService)
         {
             _specialistService = specialistService;
             _notyfService = notyfService;
         }
-
+        [Authorize(Policy = "showEspecialists")]
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
@@ -42,11 +43,14 @@ namespace SlotWise.Web.Controllers
                 return View(new PaginationResponse<SpecialistDTO>());
             }
         }
+        [Authorize(Policy = "Specialists.Create")]
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
+
+        [Authorize(Policy = "Specialists.Create")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] SpecialistDTO dto)
         {
@@ -67,6 +71,7 @@ namespace SlotWise.Web.Controllers
             _notyfService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
+        [Authorize(Policy = "Specialists.Edit")]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] Guid id)
         {
@@ -80,6 +85,7 @@ namespace SlotWise.Web.Controllers
 
             return View(response.Result);
         }
+        [Authorize(Policy = "Specialists.Edit")]
         [HttpPost]
         public async Task<IActionResult> Edit([FromForm] SpecialistDTO dto)
         {
@@ -100,7 +106,7 @@ namespace SlotWise.Web.Controllers
             _notyfService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
-
+        [Authorize(Policy = "Specialists.Delete")]
         [HttpPost]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
@@ -117,7 +123,7 @@ namespace SlotWise.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
+        [Authorize(Policy = "Specialists.Edit")]
         [HttpPost]
         public async Task<IActionResult> Toggle([FromForm] ToggleSpecialistStatusDTO dto)
         {

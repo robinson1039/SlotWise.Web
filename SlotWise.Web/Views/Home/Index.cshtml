@@ -1,5 +1,6 @@
 ﻿@using SlotWise.Web.Core.Pagination
 @using SlotWise.Web.DTOs
+@using SlotWise.Web.Data.Entities
 @model PaginationResponse<ServiceDTO>
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -13,7 +14,14 @@
                     <p class="card-text">@service.Description</p>
                     @if(service.Status == true)
                     {
-                        <a asp-action="Details" asp-route-id="@service.Id" class="btn btn-primary">Ver más</a>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-action="Details" asp-route-id="@service.Id" class="btn btn-primary">Ver más</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Login" asp-controller="User" class="btn btn-primary">Ver más</a>
+                        }
                     }
                     else
                     {

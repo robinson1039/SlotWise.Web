@@ -25,9 +25,12 @@
 
         <div class="card-header">
             <div class="row">
-                <h3 class="m-0 font-weight-bold text-primary col-md-11">Especialistas</h3>
+                <h3 class="m-0 font-weight-bold text-primary col-md-11">Usuarios</h3>
                 <div class="col-md-1">
-                    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i></a>
+                    @if (User.HasClaim("permission", "createUsers"))
+                    {
+                        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i></a>
+                    }
                 </div>
             </div>
         </div>
@@ -86,14 +89,19 @@
                             <td>@item.Birthdate.ToString("dd/MM/yyyy")</td>
                             <td>@item.CreateAt.ToString("dd/MM/yyyy")</td>
                             <td>
-                                <a asp-action="Edit" asp-route-Id="@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i></a>
-
+                                @if (User.HasClaim("permission", "updateUsers"))
+                                {
+                                    <a asp-action="Edit" asp-route-Id="@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i></a>
+                                }
                                 <form asp-action="Toggle" style="display: contents;" method="POST">
                                     <input type="hidden" value="@item.Id" name="Id" />  <!-- Cambiado a "Id" -->
                                 </form>
 
                                 <form asp-action="Delete" asp-route-Id="@item.Id" style="display: contents;">
-                                    <button class="btn btn-sm btn-danger btnDelete"><i class="bi bi-trash-fill"></i></button>
+                                    @if (User.HasClaim("permission", "createUsers"))
+                                    {
+                                        <button class="btn btn-sm btn-danger btnDelete"><i class="bi bi-trash-fill"></i></button>
+                                    }
                                 </form>
                             </td>
                         </tr>

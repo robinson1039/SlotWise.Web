@@ -9,6 +9,7 @@ using SlotWise.Web.Data.Entities;
 using SlotWise.Web.Data.Seeders;
 using SlotWise.Web.Helpers.Abstractions;
 using SlotWise.Web.Helpers.Implementations;
+using SlotWise.Web.Helpers.Security;
 using SlotWise.Web.Services;
 using SlotWise.Web.Services.Abstractions;
 using SlotWise.Web.Services.Implementations;
@@ -68,6 +69,8 @@ namespace SlotWise.Web
         private static void AddIAM(WebApplicationBuilder builder)
         {
             // Configuración de Identity con User personalizado
+            builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
+
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(conf =>
             {
                 conf.User.RequireUniqueEmail = true;
@@ -79,7 +82,57 @@ namespace SlotWise.Web
                 conf.Password.RequiredLength = 4;
             }).AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
+            // aquie se agregan politicas de accesos
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("createServices", p =>
+                     p.RequireClaim("permission", "createServices"));
 
+                options.AddPolicy("createReservations", p =>
+                    p.RequireClaim("permission", "createReservations"));
+
+                options.AddPolicy("deleteEspecialists", p =>
+                    p.RequireClaim("permission", "deleteEspecialists"));
+
+                options.AddPolicy("deleteServices", p =>
+                    p.RequireClaim("permission", "deleteServices"));
+
+                options.AddPolicy("updateUsers", p =>
+                    p.RequireClaim("permission", "updateUsers"));
+
+                options.AddPolicy("deleteUsers", p =>
+                    p.RequireClaim("permission", "deleteUsers"));
+
+                options.AddPolicy("showEspecialists", p =>
+                    p.RequireClaim("permission", "showEspecialists"));
+
+                options.AddPolicy("createUsers", p =>
+                    p.RequireClaim("permission", "createUsers"));
+
+                options.AddPolicy("createEspecialists", p =>
+                    p.RequireClaim("permission", "createEspecialists"));
+
+                options.AddPolicy("updateReservations", p =>
+                    p.RequireClaim("permission", "updateReservations"));
+
+                options.AddPolicy("showServices", p =>
+                    p.RequireClaim("permission", "showServices"));
+
+                options.AddPolicy("deleteReservations", p =>
+                    p.RequireClaim("permission", "deleteReservations"));
+
+                options.AddPolicy("showReservations", p =>
+                    p.RequireClaim("permission", "showReservations"));
+
+                options.AddPolicy("showUsers", p =>
+                    p.RequireClaim("permission", "showUsers"));
+
+                options.AddPolicy("updateEspecialists", p =>
+                    p.RequireClaim("permission", "updateEspecialists"));
+
+                options.AddPolicy("updateServices", p =>
+                    p.RequireClaim("permission", "updateServices"));
+            });
             // Configuración de la cookie de autenticación
             builder.Services.ConfigureApplicationCookie(options =>
             {

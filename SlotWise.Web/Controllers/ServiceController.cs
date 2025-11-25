@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SlotWise.Web.Core;
@@ -22,6 +23,7 @@ namespace SlotWise.Web.Controllers
             _notyfService = notyfService;
 
         }
+        [Authorize(Policy = "showServices")]
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
@@ -47,6 +49,7 @@ namespace SlotWise.Web.Controllers
             }
         }
 
+        [Authorize(Policy = "createServices")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -71,6 +74,7 @@ namespace SlotWise.Web.Controllers
             return View();
         }
 
+        [Authorize(Policy = "createServices")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ServiceDTO dto, IFormFile? ImageFile)
         {
@@ -127,6 +131,8 @@ namespace SlotWise.Web.Controllers
             _notyfService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Policy = "updateServices")]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] Guid id)
         {
@@ -148,7 +154,7 @@ namespace SlotWise.Web.Controllers
             return View(response.Result);
         }
 
-        [HttpPost]
+        [Authorize(Policy = "updateServices")]
         [HttpPost]
         public async Task<IActionResult> Edit([FromForm] ServiceDTO dto)
         {
@@ -197,7 +203,7 @@ namespace SlotWise.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
+        [Authorize(Policy = "deleteServices")]
         [HttpPost]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
@@ -215,6 +221,7 @@ namespace SlotWise.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Policy = "updateServices")]
         [HttpPost]
         public async Task<IActionResult> Toggle([FromForm] ToggleServiceStatusDTO dto)
         {

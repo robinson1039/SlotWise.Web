@@ -89,14 +89,14 @@ namespace SlotWise.Web.Services.Implementations
                 // Agregar nuevos
                 if (!string.IsNullOrEmpty(dto.PermissionIds))
                 {
-                    List<int>? permissionIds = JsonConvert.DeserializeObject<List<int>>(dto.PermissionIds);
+                    List<Guid>? permissionIds = JsonConvert.DeserializeObject<List<Guid>>(dto.PermissionIds);
 
-                    foreach (int pid in permissionIds)
+                    foreach (Guid pid in permissionIds)
                     {
                         await _context.RolePermissions.AddAsync(new RolePermission
                         {
                             PrivateRoleId = role.Id,
-                            PermissionId = role.Id
+                            PermissionId = pid
                         });
                     }
                 }

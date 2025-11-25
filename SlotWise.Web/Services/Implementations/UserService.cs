@@ -97,15 +97,56 @@ namespace SlotWise.Web.Services.Implementations
             return await _context.Users.Include(u => u.PrivateRole)
                                        .FirstOrDefaultAsync(u => u.Email == email);
         }
-        public async Task<Response<SignInResult>>LoginAsync(LoginDTO dto)
+        public async Task<Response<SignInResult>> LoginAsync(LoginDTO dto)
         {
-            SignInResult result = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, lockoutOnFailure: false);
-            return new Response<SignInResult>
+            var user = await _userManager.Users
+                .Include(u => u.PrivateRole)
+                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+            if (user == null)
+                return Response<SignInResult>.Success(SignInResult.Failed);
+
+            // Validar contraseña
+            var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
+            if (!result.Succeeded)
+                return Response<SignInResult>.Success(result);
+
+            // Obtener permisos del rol
+            var permissions = await _context.RolePermissions
+                .Where(rp => rp.PrivateRoleId == user.PrivateRoleId)
+                .Include(rp => rp.Permission)
+                .Select(rp => rp.Permission.Name)
+                .ToListAsync();
+
+            var claims = new List<Claim>();
+
+            // Rol
+            claims.Add(new Claim(ClaimTypes.Role, user.PrivateRole.Name));
+
+            // Si es Super Admin → cargar TODOS los permisos
+            if (user.PrivateRole.Name == Env.SUPER_ADMIN_ROLE_NAME)
             {
-                Result = result,
-                IsSuccess = result.Succeeded,
-            };
+                var allPerms = await _context.Permissions.Select(p => p.Name).ToListAsync();
+                foreach (var perm in allPerms)
+                    claims.Add(new Claim("permission", perm));
+            }
+            else
+            {
+                // Permisos normales del rol
+                foreach (var perm in permissions)
+                    claims.Add(new Claim("permission", perm));
+            }
+
+            // Se crea el principal
+            var principal = await _signInManager.CreateUserPrincipalAsync(user);
+            ((ClaimsIdentity)principal.Identity!).AddClaims(claims);
+
+            // Iniciar sesión
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            return Response<SignInResult>.Success(SignInResult.Success);
         }
+
         public async Task LogoutAsync()
         {
             await _signInManager.SignOutAsync();

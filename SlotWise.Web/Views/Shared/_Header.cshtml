@@ -16,9 +16,9 @@
 <header id="header" class="header fixed-top d-flex align-items-center">
 
     <div class="d-flex align-items-center justify-content-between">
-        <a href="index.html" class="logo d-flex align-items-center">
+        <a class="logo d-flex align-items-center" asp-action="Index" asp-controller="Home">
             <img src="~/assets/img/logo.png" alt="">
-            <span class="d-none d-lg-block">NiceAdmin</span>
+            <span class="d-none d-lg-block">SlotWise</span>
         </a>
         <i class="bi bi-list toggle-sidebar-btn"></i>
     </div>
@@ -73,10 +73,22 @@
                 }
                 else
                 {
-                    <a class="nav-link dropdown-toggle" asp-action="Login" asp-controller="User">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Iniciar sesión</span>
-                    </a>
+                    <div class="d-flex align-items-center gap-3">
+
+                        <!-- Registrarse -->
+                        <a class="nav-link d-flex align-items-center" asp-action="Register" asp-controller="User">
+                            <i class="bi bi-person-plus me-1"></i>
+                            <span>Registrarse</span>
+                        </a>
+
+                        <!-- Iniciar sesión -->
+                        <a class="nav-link d-flex align-items-center" asp-action="Login" asp-controller="User">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>
+                            <span>Iniciar sesión</span>
+                        </a>
+
+                    </div>
+
                 }
 
             </li>

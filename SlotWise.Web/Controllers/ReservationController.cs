@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SlotWise.Web.Core;
@@ -26,6 +27,7 @@ namespace SlotWise.Web.Controllers
 
         }
 
+        [Authorize(Policy = "showReservations")]
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
@@ -51,6 +53,7 @@ namespace SlotWise.Web.Controllers
             }
         }
 
+        [Authorize(Policy = "createReservations")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -87,6 +90,8 @@ namespace SlotWise.Web.Controllers
 
             return View();
         }
+
+        [Authorize(Policy = "createReservations")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ReservationDTO dto)
         {
@@ -109,6 +114,8 @@ namespace SlotWise.Web.Controllers
             _notyfService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Policy = "updateReservations")]
         public async Task<IActionResult> Edit([FromRoute] Guid id)
         {
             Response<ReservationDTO> response = await _reservationService.GetOneAsync(id);
@@ -146,6 +153,8 @@ namespace SlotWise.Web.Controllers
                 }).ToList();
             return View(response.Result);
         }
+       
+        [Authorize(Policy = "updateReservations")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([FromForm] ReservationDTO dto)
@@ -220,6 +229,8 @@ namespace SlotWise.Web.Controllers
             _notyfService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Policy = "deleteReservations")]
         [HttpPost]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
@@ -236,6 +247,8 @@ namespace SlotWise.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Policy = "updateReservations")]
         [HttpPost]
         public async Task<IActionResult> Toggle([FromForm] ReservationDTO dto)
         {
