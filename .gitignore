@@ -3,6 +3,7 @@
 *.suo
 *.userosscache
 *.sln.docstates
+*.env
 
 # Carpetas de compilación
 bin/
