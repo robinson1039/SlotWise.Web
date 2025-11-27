@@ -16,7 +16,7 @@ namespace SlotWise.Web.Controllers
         private readonly ISpecialistService _specialistService;
         private readonly INotyfService _notyfService;
 
-        public ServiceController(IServiceService serviceService,ISpecialistService specialistService, INotyfService notyfService)
+        public ServiceController(IServiceService serviceService, ISpecialistService specialistService, INotyfService notyfService)
         {
             _serviceService = serviceService;
             _specialistService = specialistService;
@@ -33,11 +33,11 @@ namespace SlotWise.Web.Controllers
 
                 if (!response.IsSuccess)
                 {
-                    
+
                     ViewBag.ErrorMessage = response.Message;
                     return View(new PaginationResponse<ServiceDTO>());
                 }
-                
+
 
                 return View(response.Result);
             }
@@ -146,10 +146,10 @@ namespace SlotWise.Web.Controllers
             var specialists = await _specialistService.GetListAsync();
             ViewBag.Specialists = specialists.Result?
              .Select(s => new SelectListItem
-              {
-                  Value = s.Id.ToString(),
-                  Text = s.FirstName + " " + s.LastName
-              })
+             {
+                 Value = s.Id.ToString(),
+                 Text = s.FirstName + " " + s.LastName
+             })
         .ToList();
             return View(response.Result);
         }
@@ -238,5 +238,19 @@ namespace SlotWise.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var response = await _serviceService.GetOneAsync(id);
+
+            if (!response.IsSuccess)
+            {
+                return RedirectToAction("Index", "Service");
+            }
+
+            return View(response.Result);
+        }
+
     }
 }

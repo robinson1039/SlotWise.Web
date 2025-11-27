@@ -16,6 +16,7 @@ namespace SlotWise.Web.Controllers
 {
     public class UserController : Controller
     {
+
         private readonly DataContext _context;
         private readonly IUserService _userService;
         private readonly INotyfService _notyfService;
@@ -24,7 +25,7 @@ namespace SlotWise.Web.Controllers
         private readonly ILogger<UserController> _logger;
         private readonly IRolesHelper _rolesHelper;
         public UserController(IUserService userService, INotyfService notyfService, IMapper mapper, UserManager<User> userManager, ILogger<UserController> logger,
-            DataContext context, IRolesHelper rolesHelper )
+            DataContext context, IRolesHelper rolesHelper)
         {
             _userService = userService;
             _notyfService = notyfService;
@@ -32,7 +33,48 @@ namespace SlotWise.Web.Controllers
             _userManager = userManager;
             _logger = logger;
             _context = context;
-            _rolesHelper= rolesHelper;
+            _rolesHelper = rolesHelper;
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return View(dto);
+
+            // Usuario actual
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                _notyfService.Error("Usuario no encontrado.");
+                return RedirectToAction("Login");
+            }
+
+            // Intentar cambiar contraseña
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+
+                _notyfService.Error("No se pudo cambiar la contraseña.");
+                return View(dto);
+            }
+
+            // Re-login para actualizar cookie
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            _notyfService.Success("Contraseña cambiada con éxito.");
+            return RedirectToAction("Index", "Home");
         }
 
         [Authorize(Policy = "createServices")]
@@ -42,7 +84,7 @@ namespace SlotWise.Web.Controllers
             ViewBag.Roles = await _rolesHelper.GetComboRolesAsync();
             return View();
         }
-        
+
         [Authorize(Policy = "createServices")]
         [HttpPost]
         public async Task<IActionResult> Create(UserDTO dto)
@@ -159,39 +201,39 @@ namespace SlotWise.Web.Controllers
                 Console.WriteLine();
 
                 // PrivateRole - SOLO Name (NO tiene Description)
-                Console.WriteLine("🎯 ROL PERSONALIZADO:");
+                Console.WriteLine(" ROL PERSONALIZADO:");
                 if (info.PrivateRole != null)
                 {
-                    Console.WriteLine($"   📝 {info.PrivateRole.Name}");
+                    Console.WriteLine($" {info.PrivateRole.Name}");
                 }
                 else
                 {
-                    Console.WriteLine("   ❌ No tiene rol personalizado asignado");
+                    Console.WriteLine(" No tiene rol personalizado asignado");
                 }
 
                 Console.WriteLine();
 
                 // Permisos personalizados - Permission SÍ tiene Description y Module
-                Console.WriteLine("📋 PERMISOS PERSONALIZADOS:");
+                Console.WriteLine(" PERMISOS PERSONALIZADOS:");
                 if (info.CustomPermissions.Count > 0)
                 {
                     foreach (var permission in info.CustomPermissions)
                     {
-                        Console.WriteLine($"   ✅ {permission.Name}");
-                        Console.WriteLine($"      📖 {permission.Description}");
-                        Console.WriteLine($"      🗂️  Módulo: {permission.Module}");
+                        Console.WriteLine($"   {permission.Name}");
+                        Console.WriteLine($"       {permission.Description}");
+                        Console.WriteLine($"        Módulo: {permission.Module}");
                     }
-                    Console.WriteLine($"   📊 Total: {info.CustomPermissions.Count} permisos");
+                    Console.WriteLine($"    Total: {info.CustomPermissions.Count} permisos");
                 }
                 else
                 {
-                    Console.WriteLine("   ❌ No tiene permisos personalizados");
+                    Console.WriteLine("    No tiene permisos personalizados");
                 }
 
                 Console.WriteLine();
 
                 // Claims
-                Console.WriteLine("🏷️ CLAIMS DE IDENTITY:");
+                Console.WriteLine("🏷 CLAIMS DE IDENTITY:");
                 if (info.IdentityClaims.Count > 0)
                 {
                     foreach (var claim in info.IdentityClaims)
@@ -201,7 +243,7 @@ namespace SlotWise.Web.Controllers
                 }
                 else
                 {
-                    Console.WriteLine("   ❌ No tiene claims");
+                    Console.WriteLine("    No tiene claims");
                 }
 
                 Console.WriteLine(new string('=', 50));
@@ -209,7 +251,7 @@ namespace SlotWise.Web.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al mostrar permisos: {ex.Message}");
+                Console.WriteLine($" Error al mostrar permisos: {ex.Message}");
             }
         }
 
@@ -223,7 +265,7 @@ namespace SlotWise.Web.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult>Login(LoginDTO dto)
+        public async Task<IActionResult> Login(LoginDTO dto)
         {
             if (ModelState.IsValid)
             {
@@ -270,7 +312,7 @@ namespace SlotWise.Web.Controllers
             }
 
             ViewBag.Message = "Usuario registrado con éxito";
-            return RedirectToAction("Login", "User"); // o a otra vista si deseas
+            return View(response.Result); // o a otra vista si deseas
         }
 
         [Authorize(Policy = "showUsers")]
@@ -309,7 +351,7 @@ namespace SlotWise.Web.Controllers
 
             return View(response.Result);
         }
-        
+
         [Authorize(Policy = "updateUsers")]
         [HttpPost]
         public async Task<IActionResult> Edit([FromForm] UserDTO dto)

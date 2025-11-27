@@ -12,11 +12,11 @@
                 <div class="card-body">
                     <h5 class="card-title">@service.NameService</h5>
                     <p class="card-text">@service.Description</p>
-                    @if(service.Status == true)
+                    @if (service.Status == true)
                     {
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <a asp-action="Details" asp-route-id="@service.Id" class="btn btn-primary">Ver más</a>
+                            <a asp-action="Details" asp-controller="Service" asp-route-id="@service.Id" class="btn btn-primary">Ver más</a>
                         }
                         else
                         {

@@ -6,10 +6,11 @@ using SlotWise.Web.Core;
 using SlotWise.Web.Core.Pagination;
 using SlotWise.Web.DTOs;
 using SlotWise.Web.Services.Abstractions;
+using System.Security.Claims;
 
 namespace SlotWise.Web.Controllers
 {
-    public class ReservationController:Controller
+    public class ReservationController : Controller
     {
         private readonly IReservationService _reservationService;
         private readonly IUserService _userService;
@@ -17,7 +18,7 @@ namespace SlotWise.Web.Controllers
         private readonly IServiceService _serviceService;
         private readonly INotyfService _notyfService;
 
-        public ReservationController(IReservationService  reservationService,IUserService userService,IServiceService serviceService, ISpecialistService specialistService, INotyfService notyfService)
+        public ReservationController(IReservationService reservationService, IUserService userService, IServiceService serviceService, ISpecialistService specialistService, INotyfService notyfService)
         {
             _reservationService = reservationService;
             _userService = userService;
@@ -29,27 +30,56 @@ namespace SlotWise.Web.Controllers
 
         [Authorize(Policy = "showReservations")]
         [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
+        public async Task<IActionResult> Index()
         {
             try
             {
-                Response<PaginationResponse<ReservationDTO>> response = await _reservationService.GetPaginatedListAsync(request);
+                // Obtener datos del usuario autenticado
+                var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdString == null)
+                    return RedirectToAction("Login", "User");
 
+                Guid userId = Guid.Parse(userIdString);
+
+                // Obtener todas las reservas
+                var response = await _reservationService.GetListAsync();
                 if (!response.IsSuccess)
                 {
-
                     ViewBag.ErrorMessage = response.Message;
-                    return View(new PaginationResponse<ReservationDTO>());
+                    return View(new List<ReservationDTO>());
                 }
 
+                var allReservations = response.Result.AsQueryable();
 
-                return View(response.Result);
+                // Obtener rol del usuario
+                var roles = User.Claims
+                                .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+                                .Select(c => c.Value)
+                                .ToList();
+
+                List<ReservationDTO> filteredReservations;
+
+                if (roles.Contains("employee"))
+                {
+                    // Usuario empleado → ve solo las reservas donde es especialista
+                    filteredReservations = allReservations
+                        .Where(r => r.SpecialistId == userId)
+                        .ToList();
+                }
+                else
+                {
+                    // Usuario normal → ve solo sus reservas
+                    filteredReservations = allReservations
+                        .Where(r => r.UserId == userId)
+                        .ToList();
+                }
+
+                return View(filteredReservations);
             }
             catch (Exception ex)
             {
-                // Captura cualquier excepción no manejada
                 ViewBag.ErrorMessage = ex.Message;
-                return View(new PaginationResponse<ReservationDTO>());
+                return View(new List<ReservationDTO>());
             }
         }
 
@@ -153,7 +183,7 @@ namespace SlotWise.Web.Controllers
                 }).ToList();
             return View(response.Result);
         }
-       
+
         [Authorize(Policy = "updateReservations")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -162,7 +192,7 @@ namespace SlotWise.Web.Controllers
             Response<List<UserDTO>> usersResponse = await _userService.GetListAsync();
             Response<List<SpecialistDTO>> specialistsResponse = await _specialistService.GetListAsync();
             Response<List<ServiceDTO>> servicesResponse = await _serviceService.GetListAsync();
-            // 1️ Validar modelo
+            // 1 Validar modelo
             if (!ModelState.IsValid)
             {
                 _notyfService.Warning("Debe ajustar los errores de validación.");
@@ -265,5 +295,49 @@ namespace SlotWise.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Policy = "showReservations")]
+        [HttpGet]
+        public async Task<IActionResult> Reserve(Guid serviceId)
+        {
+            // 1. Obtener usuario autenticado
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdString == null)
+                return RedirectToAction("Login", "User");
+
+            Guid userId = Guid.Parse(userIdString);
+
+            var serviceResponse = await _serviceService.GetOneAsync(serviceId);
+            if (!serviceResponse.IsSuccess)
+            {
+                _notyfService.Error("El servicio no existe.");
+                return RedirectToAction("Index", "Service");
+            }
+
+            var specialistsResponse = await _specialistService.GetListAsync();
+            ViewBag.Specialists = new SelectList(specialistsResponse.Result, "Id", "FirstName");
+
+            var usersResponse = await _userService.GetListAsync();
+            ViewBag.Users = usersResponse.Result
+                .Select(u => new SelectListItem
+                {
+                    Value = u.Id.ToString(),
+                    Text = $"{u.FirstName} {u.LastName}"
+                }).ToList();
+
+            var servicesResponse = await _serviceService.GetListAsync();
+            ViewBag.Services = new SelectList(servicesResponse.Result, "Id", "NameService");
+
+            var dto = new ReservationDTO
+            {
+                UserId = userId,
+                ServiceId = serviceId,
+                Status = true
+            };
+
+            return View("Create", dto);
+        }
+
+
     }
 }

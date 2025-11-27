@@ -85,7 +85,7 @@ namespace SlotWise.Web.Services.Implementations
                 return true;
             }
             var test = await _context.Permissions.Include(p => p.RolePermissions)
-                                                .Where(p=>p.RolePermissions.Any(rp=>rp.PrivateRoleId ==user.PrivateRoleId))
+                                                .Where(p => p.RolePermissions.Any(rp => rp.PrivateRoleId == user.PrivateRoleId))
                                                 .ToListAsync();
 
             return await _context.Permissions.Include(p => p.RolePermissions)
@@ -156,7 +156,7 @@ namespace SlotWise.Web.Services.Implementations
             try
             {
                 var userRole = await _context.PrivateRoles
-                .FirstOrDefaultAsync(r => r.Name == "Usuario");
+                .FirstOrDefaultAsync(r => r.Name == "Basic");
 
                 if (userRole == null)
                 {
